@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 3 MarkDuplicates | A practical introduction to GATK 4 on Biowulf (NIH HPC)</title>
+  <meta name="description" content="Chapter 3 MarkDuplicates | A practical introduction to GATK 4 on Biowulf (NIH HPC)" />
+  <meta name="generator" content="bookdown 0.22 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 3 MarkDuplicates | A practical introduction to GATK 4 on Biowulf (NIH HPC)" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 3 MarkDuplicates | A practical introduction to GATK 4 on Biowulf (NIH HPC)" />
+  
+  
+  
+
+<meta name="author" content="Qi Yu and Wolfgang Resch" />
+
+
+<meta name="date" content="2021-06-15" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="workflow-overview.html"/>
+<link rel="next" href="bqsr.html"/>
+<script src="libs/header-attrs-2.8/header-attrs.js"></script>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">GATK on biowulf</a></li>
+<li class="toc-logo"><a href="./"><img src="images/Biowulf_Logo_RGB_Cyan_Blue.png" height=42></a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Prerequisites</a>
+<ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#software"><i class="fa fa-check"></i>Software</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#sequencing-data"><i class="fa fa-check"></i>Sequencing data</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="preproc.html"><a href="preproc.html"><i class="fa fa-check"></i><b>1</b> Data preprocessing</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="preproc.html"><a href="preproc.html#brief-introduction"><i class="fa fa-check"></i><b>1.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="1.2" data-path="preproc.html"><a href="preproc.html#preproc-tools"><i class="fa fa-check"></i><b>1.2</b> Tools</a></li>
+<li class="chapter" data-level="1.3" data-path="preproc.html"><a href="preproc.html#preproc-single-tools"><i class="fa fa-check"></i><b>1.3</b> Individual tool benchmarks</a>
+<ul>
+<li class="chapter" data-level="1.3.1" data-path="preproc.html"><a href="preproc.html#preproc-trim"><i class="fa fa-check"></i><b>1.3.1</b> Adapter trimming</a></li>
+<li class="chapter" data-level="1.3.2" data-path="preproc.html"><a href="preproc.html#preproc-align"><i class="fa fa-check"></i><b>1.3.2</b> Alignment</a></li>
+<li class="chapter" data-level="1.3.3" data-path="preproc.html"><a href="preproc.html#preproc-sort"><i class="fa fa-check"></i><b>1.3.3</b> Alternative A: Sorting by coordinate</a></li>
+<li class="chapter" data-level="1.3.4" data-path="preproc.html"><a href="preproc.html#preproc-view"><i class="fa fa-check"></i><b>1.3.4</b> Alternative B: Queryname-grouped (unsorted) BAM</a></li>
+</ul></li>
+<li class="chapter" data-level="1.4" data-path="preproc.html"><a href="preproc.html#optimized-script"><i class="fa fa-check"></i><b>1.4</b> Optimized script</a>
+<ul>
+<li class="chapter" data-level="1.4.1" data-path="preproc.html"><a href="preproc.html#alternative-a-producing-sorted-bam-output"><i class="fa fa-check"></i><b>1.4.1</b> Alternative A: producing sorted BAM output</a></li>
+<li class="chapter" data-level="1.4.2" data-path="preproc.html"><a href="preproc.html#preproc-nosort-pipeline"><i class="fa fa-check"></i><b>1.4.2</b> Alternative B: BAM output without coordinate sorting</a></li>
+</ul></li>
+<li class="chapter" data-level="1.5" data-path="preproc.html"><a href="preproc.html#read-groups"><i class="fa fa-check"></i><b>1.5</b> Read groups</a></li>
+<li class="chapter" data-level="1.6" data-path="preproc.html"><a href="preproc.html#processing-the-example-trio"><i class="fa fa-check"></i><b>1.6</b> Processing the example trio</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="workflow-overview.html"><a href="workflow-overview.html"><i class="fa fa-check"></i><b>2</b> GATK practice workflow</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="workflow-overview.html"><a href="workflow-overview.html#cleaning-up-raw-alignments"><i class="fa fa-check"></i><b>2.1</b> Cleaning up raw alignments</a></li>
+<li class="chapter" data-level="2.2" data-path="workflow-overview.html"><a href="workflow-overview.html#joint-calling"><i class="fa fa-check"></i><b>2.2</b> Joint Calling</a></li>
+<li class="chapter" data-level="2.3" data-path="workflow-overview.html"><a href="workflow-overview.html#variant-filtering"><i class="fa fa-check"></i><b>2.3</b> Variant filtering</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="markdup.html"><a href="markdup.html"><i class="fa fa-check"></i><b>3</b> MarkDuplicates</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="markdup.html"><a href="markdup.html#brief-introduction-1"><i class="fa fa-check"></i><b>3.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="3.2" data-path="markdup.html"><a href="markdup.html#benchmarks-of-markduplicatesspark"><i class="fa fa-check"></i><b>3.2</b> Benchmarks of <code>MarkDuplicatesSpark</code></a>
+<ul>
+<li class="chapter" data-level="3.2.1" data-path="markdup.html"><a href="markdup.html#queryname-grouped-input-data-as-generated-by-the-aligner"><i class="fa fa-check"></i><b>3.2.1</b> Queryname-grouped input data (as generated by the aligner)</a></li>
+<li class="chapter" data-level="3.2.2" data-path="markdup.html"><a href="markdup.html#coordinate-sorted-input-data"><i class="fa fa-check"></i><b>3.2.2</b> Coordinate-sorted input data</a></li>
+<li class="chapter" data-level="3.2.3" data-path="markdup.html"><a href="markdup.html#performance-comparing-between-queryname-grouped-and-coordinate-sorted-inputs"><i class="fa fa-check"></i><b>3.2.3</b> Performance comparing between queryname-grouped and coordinate-sorted inputs</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="markdup.html"><a href="markdup.html#optimized-script-1"><i class="fa fa-check"></i><b>3.3</b> Optimized script</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="bqsr.html"><a href="bqsr.html"><i class="fa fa-check"></i><b>4</b> BQSR</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="bqsr.html"><a href="bqsr.html#brief-introduction-2"><i class="fa fa-check"></i><b>4.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="4.2" data-path="bqsr.html"><a href="bqsr.html#benchmarks-of-baserecalibrator"><i class="fa fa-check"></i><b>4.2</b> Benchmarks of <code>BaseRecalibrator</code></a></li>
+<li class="chapter" data-level="4.3" data-path="bqsr.html"><a href="bqsr.html#optimized-script-for-baserecalibrator"><i class="fa fa-check"></i><b>4.3</b> Optimized script for <code>BaseRecalibrator</code></a></li>
+<li class="chapter" data-level="4.4" data-path="bqsr.html"><a href="bqsr.html#benchmarks-of-applybqsr"><i class="fa fa-check"></i><b>4.4</b> Benchmarks of <code>ApplyBQSR</code></a></li>
+<li class="chapter" data-level="4.5" data-path="bqsr.html"><a href="bqsr.html#optimized-script-for-applybqsr"><i class="fa fa-check"></i><b>4.5</b> Optimized script for <code>ApplyBQSR</code></a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="haplotype-caller.html"><a href="haplotype-caller.html"><i class="fa fa-check"></i><b>5</b> HaplotypeCaller</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="haplotype-caller.html"><a href="haplotype-caller.html#brief-introduction-3"><i class="fa fa-check"></i><b>5.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="5.2" data-path="haplotype-caller.html"><a href="haplotype-caller.html#benchmarks"><i class="fa fa-check"></i><b>5.2</b> Benchmarks</a></li>
+<li class="chapter" data-level="5.3" data-path="haplotype-caller.html"><a href="haplotype-caller.html#optimized-script-2"><i class="fa fa-check"></i><b>5.3</b> Optimized script</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="genomics-db-import.html"><a href="genomics-db-import.html"><i class="fa fa-check"></i><b>6</b> GenomicsDBImport (replaces CombineGVCFs)</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="genomics-db-import.html"><a href="genomics-db-import.html#brief-introduction-4"><i class="fa fa-check"></i><b>6.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="6.2" data-path="genomics-db-import.html"><a href="genomics-db-import.html#benchmarks-1"><i class="fa fa-check"></i><b>6.2</b> Benchmarks</a></li>
+<li class="chapter" data-level="6.3" data-path="genomics-db-import.html"><a href="genomics-db-import.html#optimized-script-3"><i class="fa fa-check"></i><b>6.3</b> Optimized script</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="genotype-gvcfs.html"><a href="genotype-gvcfs.html"><i class="fa fa-check"></i><b>7</b> GenotypeGVCFs</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="genotype-gvcfs.html"><a href="genotype-gvcfs.html#brief-introduction-5"><i class="fa fa-check"></i><b>7.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="7.2" data-path="genotype-gvcfs.html"><a href="genotype-gvcfs.html#benchmarks-2"><i class="fa fa-check"></i><b>7.2</b> Benchmarks</a></li>
+<li class="chapter" data-level="7.3" data-path="genotype-gvcfs.html"><a href="genotype-gvcfs.html#optimized-script-4"><i class="fa fa-check"></i><b>7.3</b> Optimized script</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="vqsr.html"><a href="vqsr.html"><i class="fa fa-check"></i><b>8</b> VQSR</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="vqsr.html"><a href="vqsr.html#brief-introduction-6"><i class="fa fa-check"></i><b>8.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="8.2" data-path="vqsr.html"><a href="vqsr.html#benchmarks-of-variantrecalibrator"><i class="fa fa-check"></i><b>8.2</b> Benchmarks of <code>VariantRecalibrator</code></a></li>
+<li class="chapter" data-level="8.3" data-path="vqsr.html"><a href="vqsr.html#optimized-script-for-variantrecalibrator"><i class="fa fa-check"></i><b>8.3</b> Optimized script for <code>VariantRecalibrator</code></a></li>
+<li class="chapter" data-level="8.4" data-path="vqsr.html"><a href="vqsr.html#benchmarks-of-applyvqsr"><i class="fa fa-check"></i><b>8.4</b> Benchmarks of <code>ApplyVQSR</code></a></li>
+<li class="chapter" data-level="8.5" data-path="vqsr.html"><a href="vqsr.html#optimized-script-for-applyvqsr"><i class="fa fa-check"></i><b>8.5</b> Optimized script for <code>ApplyVQSR</code></a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="gt-posteriors.html"><a href="gt-posteriors.html"><i class="fa fa-check"></i><b>9</b> Calculate genotype posteriors</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="gt-posteriors.html"><a href="gt-posteriors.html#brief-introduction-7"><i class="fa fa-check"></i><b>9.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="9.2" data-path="gt-posteriors.html"><a href="gt-posteriors.html#benchmarks-3"><i class="fa fa-check"></i><b>9.2</b> Benchmarks</a></li>
+<li class="chapter" data-level="9.3" data-path="gt-posteriors.html"><a href="gt-posteriors.html#optimized-script-5"><i class="fa fa-check"></i><b>9.3</b> Optimized script</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">A practical introduction to GATK 4 on Biowulf (NIH HPC)</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="markdup" class="section level1" number="3">
+<h1><span class="header-section-number">Chapter 3</span> MarkDuplicates</h1>
+<div id="brief-introduction-1" class="section level2" number="3.1">
+<h2><span class="header-section-number">3.1</span> Brief introduction</h2>
+<p>Duplicate reads are derived from the same original physical
+fragment in the DNA library. There are two types of duplicates: PCR duplicates
+and Sequencing (various optical confusions) duplicates. To avoid
+measurement bias and reduce error, only one best copy should be kept.</p>
+<p>To take only one representative read, GATK uses a <em>Picard</em> tool
+(<code>MarkDuplicates</code>) to mark all the other reads from a set of duplicates with
+a tag. Reads are tagged but not removed from the alignment.</p>
+<p>Here we use <code>MarkDuplicatesSpark</code> instead of <code>MarkDuplicates</code>. Spark is
+used for parallelism in GATK 4 and can speed up the process relative to the
+serial tools. However, not all Spark based tools are considered production
+quality and there aren’t Spark versions of each GATK tool. To use Spark
+multithreading on the Biowulf cluster, it is necessary to add <code>--spark-runner LOCAL[$SLURM_CPUS_PER_TASK]</code> (or <code>--spark-runner LOCAL</code>) to the base command
+line.</p>
+<p><code>MarkDuplicatesSpark</code> is optimized to run on queryname-grouped alignments
+(that is, all reads with the same queryname are together in the input file). If
+provided coordinate-sorted alignments (output of <code>samtools sort</code> or <code>picard SortSam</code>), the tool will spend additional time first queryname sorting the reads
+internally.</p>
+</div>
+<div id="benchmarks-of-markduplicatesspark" class="section level2" number="3.2">
+<h2><span class="header-section-number">3.2</span> Benchmarks of <code>MarkDuplicatesSpark</code></h2>
+<div id="queryname-grouped-input-data-as-generated-by-the-aligner" class="section level3" number="3.2.1">
+<h3><span class="header-section-number">3.2.1</span> Queryname-grouped input data (as generated by the aligner)</h3>
+<p>We did a benchmark on the performance of <code>MarkDuplicatesSpark</code> on queryname-grouped input with different numbers of CPUs and memory. As show in figure <a href="markdup.html#fig:markdup-queryname-cpu">3.1</a>, the runtime is not reduced much when using more than 20 threads.These benchmark tests are performed on the same type of nodes (x2680).</p>
+
+<div class="figure" style="text-align: center"><span id="fig:markdup-queryname-cpu"></span>
+<img src="images/03-MarkDuplicatesSpark_queryname_benchmark_cpu_constrain.png" alt="MarkDuplicatesSpark runtime with different numbers of threads." width="70%" />
+<p class="caption">
+Figure 3.1: <code>MarkDuplicatesSpark</code> runtime with different numbers of threads.
+</p>
+</div>
+<p>We normally recommend to run scripts with 70%-80% effiency (figure
+<a href="markdup.html#fig:markdup-queryname-eff">3.2</a>), therefore <code>MarkDuplicatesSpark</code> should be
+run with no more than 20 threads. Using the <code>G1GC</code> garbage collector did not improve performance with default parameters.</p>
+
+<div class="figure" style="text-align: center"><span id="fig:markdup-queryname-eff"></span>
+<img src="images/03-MarkDuplicatesSpark_queryname_efficiency_cpu_constrain.png" alt="MarkDuplicatesSpark efficiency for queryname-grouped input data. For good efficiency no more than 20 threads should be run." width="70%" />
+<p class="caption">
+Figure 3.2: <code>MarkDuplicatesSpark</code> efficiency for queryname-grouped input data. For good efficiency no more than 20 threads should be run.
+</p>
+</div>
+<p>As for memory, increasing memory beyond the required minimum of 80GB (20 threads) did not improve the performance (figure <a href="markdup.html#fig:markdup-queryname-mem">3.3</a>).</p>
+
+<div class="figure" style="text-align: center"><span id="fig:markdup-queryname-mem"></span>
+<img src="images/03-MarkDuplicatesSpark_queryname_benchmark_mem_constrain.png" alt="Increasing memory did not improve performance." width="70%" />
+<p class="caption">
+Figure 3.3: Increasing memory did not improve performance.
+</p>
+</div>
+</div>
+<div id="coordinate-sorted-input-data" class="section level3" number="3.2.2">
+<h3><span class="header-section-number">3.2.2</span> Coordinate-sorted input data</h3>
+<p>We also did a benchmark on the performance of <code>MarkDuplicatesSpark</code> on
+coordinate-sorted input files with different numbers of CPUs and memory. As
+show in figure <a href="markdup.html#fig:markdup-coord-cpu">3.4</a>, the runtime is not reduced much
+when using more than 8 threads. These benchmark tests are performed on the same
+type of nodes (x2680 or x2695).</p>
+
+<div class="figure" style="text-align: center"><span id="fig:markdup-coord-cpu"></span>
+<img src="images/03-MarkDuplicatesSpark_coordinate_benchmark_cpu_constrain.png" alt="MarkDuplicatesSpark runtime with different numbers of threads." width="70%" />
+<p class="caption">
+Figure 3.4: <code>MarkDuplicatesSpark</code> runtime with different numbers of threads.
+</p>
+</div>
+<p>We normally recommend to run scripts with 70%-80% efficiency (figure <a href="markdup.html#fig:markdup-coord-eff">3.5</a>), therefore <code>MarkDuplicatesSpark</code> should be run with no more than 16 threads.</p>
+
+<div class="figure" style="text-align: center"><span id="fig:markdup-coord-eff"></span>
+<img src="images/03-MarkDuplicatesSpark_coordinate_efficiency_cpu_constrain.png" alt="MarkDuplicatesSpark efficiency for coordinate-sorted input data. For good efficiency no more than 16 threads should be run." width="70%" />
+<p class="caption">
+Figure 3.5: <code>MarkDuplicatesSpark</code> efficiency for coordinate-sorted input data. For good efficiency no more than 16 threads should be run.
+</p>
+</div>
+<p>Increasing memory to more than the required minimum of 60GB (at 8 threads) did not improve performance (figure <a href="markdup.html#fig:markdup-coord-mem">3.6</a>).</p>
+
+<div class="figure" style="text-align: center"><span id="fig:markdup-coord-mem"></span>
+<img src="images/03-MarkDuplicatesSpark_coordinate_benchmark_mem_constrain.png" alt="Increasing memory did not improve performance." width="70%" />
+<p class="caption">
+Figure 3.6: Increasing memory did not improve performance.
+</p>
+</div>
+</div>
+<div id="performance-comparing-between-queryname-grouped-and-coordinate-sorted-inputs" class="section level3" number="3.2.3">
+<h3><span class="header-section-number">3.2.3</span> Performance comparing between queryname-grouped and coordinate-sorted inputs</h3>
+<p>Our test shows that using coordinate-sorted inputs can increase processing time as
+much as 2-fold (figure <a href="markdup.html#fig:markdup-coord-vs-qn">3.7</a>).</p>
+
+<div class="figure" style="text-align: center"><span id="fig:markdup-coord-vs-qn"></span>
+<img src="images/03-MarkDuplicatesSpark_queryname_benchmark_cpu_time_consume.png" alt="Using queryname grouped input unmodified from the aligner vs coordinate sorted input is as much as 2x faster." width="70%" />
+<p class="caption">
+Figure 3.7: Using queryname grouped input unmodified from the aligner vs coordinate sorted input is as much as 2x faster.
+</p>
+</div>
+</div>
+</div>
+<div id="optimized-script-1" class="section level2" number="3.3">
+<h2><span class="header-section-number">3.3</span> Optimized script</h2>
+<!-- TODO: where is the data? also - we should probably use the same data? -->
+<p>Your first real GATK commands:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb9-1"><a href="markdup.html#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> data/<span class="kw">;</span> <span class="dt">\</span></span>
+<span id="cb9-2"><a href="markdup.html#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">gatk</span> <span class="at">--java-options</span> <span class="st">&quot;-Djava.io.tmpdir=/lscratch/</span><span class="va">$SLURM_JOBID</span><span class="st"> -Xms60G -Xmx60G&quot;</span> MarkDuplicatesSpark <span class="dt">\</span></span>
+<span id="cb9-3"><a href="markdup.html#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-I</span> NA12878.bam <span class="dt">\</span></span>
+<span id="cb9-4"><a href="markdup.html#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-O</span> NA12878_markdup.bam <span class="dt">\</span></span>
+<span id="cb9-5"><a href="markdup.html#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--spark-runner</span> LOCAL</span>
+<span id="cb9-6"><a href="markdup.html#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="markdup.html#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> data/<span class="kw">;</span> <span class="dt">\</span></span>
+<span id="cb9-8"><a href="markdup.html#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="ex">gatk</span> <span class="at">--java-options</span> <span class="st">&quot;-Djava.io.tmpdir=/lscratch/</span><span class="va">$SLURM_JOBID</span><span class="st"> -Xms60G -Xmx60G&quot;</span> MarkDuplicatesSpark <span class="dt">\</span></span>
+<span id="cb9-9"><a href="markdup.html#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">-I</span> NA12891.bam <span class="dt">\</span></span>
+<span id="cb9-10"><a href="markdup.html#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">-O</span> NA12891_markdup.bam <span class="dt">\</span></span>
+<span id="cb9-11"><a href="markdup.html#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">--spark-runner</span> LOCAL</span>
+<span id="cb9-12"><a href="markdup.html#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="markdup.html#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> data/<span class="kw">;</span> <span class="dt">\</span></span>
+<span id="cb9-14"><a href="markdup.html#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="ex">gatk</span> <span class="at">--java-options</span> <span class="st">&quot;-Djava.io.tmpdir=/lscratch/</span><span class="va">$SLURM_JOBID</span><span class="st"> -Xms60G -Xmx60G&quot;</span> MarkDuplicatesSpark <span class="dt">\</span></span>
+<span id="cb9-15"><a href="markdup.html#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">-I</span> NA12892.bam <span class="dt">\</span></span>
+<span id="cb9-16"><a href="markdup.html#cb9-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">-O</span> NA12892_markdup.bam <span class="dt">\</span></span>
+<span id="cb9-17"><a href="markdup.html#cb9-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">--spark-runner</span> LOCAL</span></code></pre></div>
+<p>You can submit these commands as separate Biowulf jobs with <a href="https://hpc.nih.gov/apps/swarm.html">swarm</a>:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb10-1"><a href="markdup.html#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">swarm</span> <span class="at">-t</span> 20 <span class="at">-g</span> 80 <span class="at">--gres</span><span class="op">=</span>lscratch:500 <span class="at">--time</span><span class="op">=</span>12:00:00 <span class="at">-m</span> GATK/4.1.8.1 <span class="at">-f</span> 03-GATK_MarkDuplicatesSpark.sh</span></code></pre></div>
+<p>Notes:</p>
+<ul>
+<li>GATK will print a lot of console output. The header will tell you what you’re running; the progress meter will inform you how far along you are; and the footer will signal when the run is complete and running time.</li>
+<li>If anything went wrong, check the output files first.</li>
+<li>Common errors include typos and incorrect file paths.</li>
+</ul>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="workflow-overview.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="bqsr.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["GATK.pdf", "GATK.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

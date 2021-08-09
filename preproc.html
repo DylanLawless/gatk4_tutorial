@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 1 Data preprocessing | A practical introduction to GATK 4 on Biowulf (NIH HPC)</title>
+  <meta name="description" content="Chapter 1 Data preprocessing | A practical introduction to GATK 4 on Biowulf (NIH HPC)" />
+  <meta name="generator" content="bookdown 0.22 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 1 Data preprocessing | A practical introduction to GATK 4 on Biowulf (NIH HPC)" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 1 Data preprocessing | A practical introduction to GATK 4 on Biowulf (NIH HPC)" />
+  
+  
+  
+
+<meta name="author" content="Qi Yu and Wolfgang Resch" />
+
+
+<meta name="date" content="2021-06-15" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="index.html"/>
+<link rel="next" href="workflow-overview.html"/>
+<script src="libs/header-attrs-2.8/header-attrs.js"></script>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">GATK on biowulf</a></li>
+<li class="toc-logo"><a href="./"><img src="images/Biowulf_Logo_RGB_Cyan_Blue.png" height=42></a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Prerequisites</a>
+<ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#software"><i class="fa fa-check"></i>Software</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#sequencing-data"><i class="fa fa-check"></i>Sequencing data</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="preproc.html"><a href="preproc.html"><i class="fa fa-check"></i><b>1</b> Data preprocessing</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="preproc.html"><a href="preproc.html#brief-introduction"><i class="fa fa-check"></i><b>1.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="1.2" data-path="preproc.html"><a href="preproc.html#preproc-tools"><i class="fa fa-check"></i><b>1.2</b> Tools</a></li>
+<li class="chapter" data-level="1.3" data-path="preproc.html"><a href="preproc.html#preproc-single-tools"><i class="fa fa-check"></i><b>1.3</b> Individual tool benchmarks</a>
+<ul>
+<li class="chapter" data-level="1.3.1" data-path="preproc.html"><a href="preproc.html#preproc-trim"><i class="fa fa-check"></i><b>1.3.1</b> Adapter trimming</a></li>
+<li class="chapter" data-level="1.3.2" data-path="preproc.html"><a href="preproc.html#preproc-align"><i class="fa fa-check"></i><b>1.3.2</b> Alignment</a></li>
+<li class="chapter" data-level="1.3.3" data-path="preproc.html"><a href="preproc.html#preproc-sort"><i class="fa fa-check"></i><b>1.3.3</b> Alternative A: Sorting by coordinate</a></li>
+<li class="chapter" data-level="1.3.4" data-path="preproc.html"><a href="preproc.html#preproc-view"><i class="fa fa-check"></i><b>1.3.4</b> Alternative B: Queryname-grouped (unsorted) BAM</a></li>
+</ul></li>
+<li class="chapter" data-level="1.4" data-path="preproc.html"><a href="preproc.html#optimized-script"><i class="fa fa-check"></i><b>1.4</b> Optimized script</a>
+<ul>
+<li class="chapter" data-level="1.4.1" data-path="preproc.html"><a href="preproc.html#alternative-a-producing-sorted-bam-output"><i class="fa fa-check"></i><b>1.4.1</b> Alternative A: producing sorted BAM output</a></li>
+<li class="chapter" data-level="1.4.2" data-path="preproc.html"><a href="preproc.html#preproc-nosort-pipeline"><i class="fa fa-check"></i><b>1.4.2</b> Alternative B: BAM output without coordinate sorting</a></li>
+</ul></li>
+<li class="chapter" data-level="1.5" data-path="preproc.html"><a href="preproc.html#read-groups"><i class="fa fa-check"></i><b>1.5</b> Read groups</a></li>
+<li class="chapter" data-level="1.6" data-path="preproc.html"><a href="preproc.html#processing-the-example-trio"><i class="fa fa-check"></i><b>1.6</b> Processing the example trio</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="workflow-overview.html"><a href="workflow-overview.html"><i class="fa fa-check"></i><b>2</b> GATK practice workflow</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="workflow-overview.html"><a href="workflow-overview.html#cleaning-up-raw-alignments"><i class="fa fa-check"></i><b>2.1</b> Cleaning up raw alignments</a></li>
+<li class="chapter" data-level="2.2" data-path="workflow-overview.html"><a href="workflow-overview.html#joint-calling"><i class="fa fa-check"></i><b>2.2</b> Joint Calling</a></li>
+<li class="chapter" data-level="2.3" data-path="workflow-overview.html"><a href="workflow-overview.html#variant-filtering"><i class="fa fa-check"></i><b>2.3</b> Variant filtering</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="markdup.html"><a href="markdup.html"><i class="fa fa-check"></i><b>3</b> MarkDuplicates</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="markdup.html"><a href="markdup.html#brief-introduction-1"><i class="fa fa-check"></i><b>3.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="3.2" data-path="markdup.html"><a href="markdup.html#benchmarks-of-markduplicatesspark"><i class="fa fa-check"></i><b>3.2</b> Benchmarks of <code>MarkDuplicatesSpark</code></a>
+<ul>
+<li class="chapter" data-level="3.2.1" data-path="markdup.html"><a href="markdup.html#queryname-grouped-input-data-as-generated-by-the-aligner"><i class="fa fa-check"></i><b>3.2.1</b> Queryname-grouped input data (as generated by the aligner)</a></li>
+<li class="chapter" data-level="3.2.2" data-path="markdup.html"><a href="markdup.html#coordinate-sorted-input-data"><i class="fa fa-check"></i><b>3.2.2</b> Coordinate-sorted input data</a></li>
+<li class="chapter" data-level="3.2.3" data-path="markdup.html"><a href="markdup.html#performance-comparing-between-queryname-grouped-and-coordinate-sorted-inputs"><i class="fa fa-check"></i><b>3.2.3</b> Performance comparing between queryname-grouped and coordinate-sorted inputs</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="markdup.html"><a href="markdup.html#optimized-script-1"><i class="fa fa-check"></i><b>3.3</b> Optimized script</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="bqsr.html"><a href="bqsr.html"><i class="fa fa-check"></i><b>4</b> BQSR</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="bqsr.html"><a href="bqsr.html#brief-introduction-2"><i class="fa fa-check"></i><b>4.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="4.2" data-path="bqsr.html"><a href="bqsr.html#benchmarks-of-baserecalibrator"><i class="fa fa-check"></i><b>4.2</b> Benchmarks of <code>BaseRecalibrator</code></a></li>
+<li class="chapter" data-level="4.3" data-path="bqsr.html"><a href="bqsr.html#optimized-script-for-baserecalibrator"><i class="fa fa-check"></i><b>4.3</b> Optimized script for <code>BaseRecalibrator</code></a></li>
+<li class="chapter" data-level="4.4" data-path="bqsr.html"><a href="bqsr.html#benchmarks-of-applybqsr"><i class="fa fa-check"></i><b>4.4</b> Benchmarks of <code>ApplyBQSR</code></a></li>
+<li class="chapter" data-level="4.5" data-path="bqsr.html"><a href="bqsr.html#optimized-script-for-applybqsr"><i class="fa fa-check"></i><b>4.5</b> Optimized script for <code>ApplyBQSR</code></a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="haplotype-caller.html"><a href="haplotype-caller.html"><i class="fa fa-check"></i><b>5</b> HaplotypeCaller</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="haplotype-caller.html"><a href="haplotype-caller.html#brief-introduction-3"><i class="fa fa-check"></i><b>5.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="5.2" data-path="haplotype-caller.html"><a href="haplotype-caller.html#benchmarks"><i class="fa fa-check"></i><b>5.2</b> Benchmarks</a></li>
+<li class="chapter" data-level="5.3" data-path="haplotype-caller.html"><a href="haplotype-caller.html#optimized-script-2"><i class="fa fa-check"></i><b>5.3</b> Optimized script</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="genomics-db-import.html"><a href="genomics-db-import.html"><i class="fa fa-check"></i><b>6</b> GenomicsDBImport (replaces CombineGVCFs)</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="genomics-db-import.html"><a href="genomics-db-import.html#brief-introduction-4"><i class="fa fa-check"></i><b>6.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="6.2" data-path="genomics-db-import.html"><a href="genomics-db-import.html#benchmarks-1"><i class="fa fa-check"></i><b>6.2</b> Benchmarks</a></li>
+<li class="chapter" data-level="6.3" data-path="genomics-db-import.html"><a href="genomics-db-import.html#optimized-script-3"><i class="fa fa-check"></i><b>6.3</b> Optimized script</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="genotype-gvcfs.html"><a href="genotype-gvcfs.html"><i class="fa fa-check"></i><b>7</b> GenotypeGVCFs</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="genotype-gvcfs.html"><a href="genotype-gvcfs.html#brief-introduction-5"><i class="fa fa-check"></i><b>7.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="7.2" data-path="genotype-gvcfs.html"><a href="genotype-gvcfs.html#benchmarks-2"><i class="fa fa-check"></i><b>7.2</b> Benchmarks</a></li>
+<li class="chapter" data-level="7.3" data-path="genotype-gvcfs.html"><a href="genotype-gvcfs.html#optimized-script-4"><i class="fa fa-check"></i><b>7.3</b> Optimized script</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="vqsr.html"><a href="vqsr.html"><i class="fa fa-check"></i><b>8</b> VQSR</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="vqsr.html"><a href="vqsr.html#brief-introduction-6"><i class="fa fa-check"></i><b>8.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="8.2" data-path="vqsr.html"><a href="vqsr.html#benchmarks-of-variantrecalibrator"><i class="fa fa-check"></i><b>8.2</b> Benchmarks of <code>VariantRecalibrator</code></a></li>
+<li class="chapter" data-level="8.3" data-path="vqsr.html"><a href="vqsr.html#optimized-script-for-variantrecalibrator"><i class="fa fa-check"></i><b>8.3</b> Optimized script for <code>VariantRecalibrator</code></a></li>
+<li class="chapter" data-level="8.4" data-path="vqsr.html"><a href="vqsr.html#benchmarks-of-applyvqsr"><i class="fa fa-check"></i><b>8.4</b> Benchmarks of <code>ApplyVQSR</code></a></li>
+<li class="chapter" data-level="8.5" data-path="vqsr.html"><a href="vqsr.html#optimized-script-for-applyvqsr"><i class="fa fa-check"></i><b>8.5</b> Optimized script for <code>ApplyVQSR</code></a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="gt-posteriors.html"><a href="gt-posteriors.html"><i class="fa fa-check"></i><b>9</b> Calculate genotype posteriors</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="gt-posteriors.html"><a href="gt-posteriors.html#brief-introduction-7"><i class="fa fa-check"></i><b>9.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="9.2" data-path="gt-posteriors.html"><a href="gt-posteriors.html#benchmarks-3"><i class="fa fa-check"></i><b>9.2</b> Benchmarks</a></li>
+<li class="chapter" data-level="9.3" data-path="gt-posteriors.html"><a href="gt-posteriors.html#optimized-script-5"><i class="fa fa-check"></i><b>9.3</b> Optimized script</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">A practical introduction to GATK 4 on Biowulf (NIH HPC)</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="preproc" class="section level1" number="1">
+<h1><span class="header-section-number">Chapter 1</span> Data preprocessing</h1>
+<div id="brief-introduction" class="section level2" number="1.1">
+<h2><span class="header-section-number">1.1</span> Brief introduction</h2>
+<p>Data preprocessing includes read trimming, alignment, sorting by coordinate,
+and marking duplicates. Duplicate marking itself is discussed in Chapter
+<a href="markdup.html#markdup">3</a>. GATK’s duplicate marking tools perform more efficiently with
+queryname-grouped input as generated by the aligner and produce sorted BAM
+output so the most efficient pipeline would not write sorted BAM files from the
+aligner. However, in other cases a sorted BAM file prior to marking duplicates
+may be desired. Therefore, in this Chapter benchmarks and scripts for either
+unmodified or sorted BAM output from FASTQ files are presented.</p>
+<p>For efficiency trimming, alignment, and converting (or sorting) to BAM format are run
+concurrently with data flowing through linux pipes to avoid unnecessary IO. The thoughput
+of each of the three components should be
+similar to each other and within the range of good parallel efficiency (70~80%
+of ideal performance).</p>
+<p>Whether sorting or not, it is important to <em>not</em> write uncompressed SAM
+files to disk since conversion to BAM is not computationally intensive and BAM
+files are much smaller than SAM files.</p>
+<p>Note that the GATK best practices pipeline starts from an unaligned BAM file
+(ubam) and includes some additional steps but for the purposes of this tutorial
+these are omitted.</p>
+</div>
+<div id="preproc-tools" class="section level2" number="1.2">
+<h2><span class="header-section-number">1.2</span> Tools</h2>
+<ul>
+<li>fastp 0.20.1</li>
+<li>bwa 0.7.17</li>
+<li>samtools 1.11</li>
+<li>mosdepth 0.3.0</li>
+</ul>
+</div>
+<div id="preproc-single-tools" class="section level2" number="1.3">
+<h2><span class="header-section-number">1.3</span> Individual tool benchmarks</h2>
+<p>First we optimize each individual step.</p>
+<div id="preproc-trim" class="section level3" number="1.3.1">
+<h3><span class="header-section-number">1.3.1</span> Adapter trimming</h3>
+<p>While we use <code>fastp</code> for this step, there are many other ways of trimming adapters.
+In this Section read pairs are written interleaved to <code>stdout</code> and discarded because
+in the later preprocessing Section <a href="preproc.html#preproc-nosort-pipeline">1.4.2</a> read pairs will be piped directly to <code>bwa</code>
+to avoid unnecessarily writing temporary data to disk. FASTQ files were read from
+<code>lscratch</code> to avoid inconsistent results due to file system load and all
+tests were run on x2695 nodes. The command used was:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="preproc.html#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">fastp</span> <span class="at">-i</span> /lscratch/<span class="va">${SLURM_JOB_ID}</span>/<span class="va">$(</span><span class="fu">basename</span> <span class="va">$r1)</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="preproc.html#cb1-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">-I</span> /lscratch/<span class="va">${SLURM_JOB_ID}</span>/<span class="va">$(</span><span class="fu">basename</span> <span class="va">$r2)</span> <span class="dt">\</span></span>
+<span id="cb1-3"><a href="preproc.html#cb1-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">--stdout</span> <span class="at">--thread</span> <span class="va">$threads</span> <span class="dt">\</span></span>
+<span id="cb1-4"><a href="preproc.html#cb1-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">-j</span> <span class="st">&quot;</span><span class="va">${logs}</span><span class="st">/fastp-</span><span class="va">${SLURM_JOB_ID}</span><span class="st">.json&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-5"><a href="preproc.html#cb1-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">-h</span> <span class="st">&quot;</span><span class="va">${logs}</span><span class="st">/fastp-</span><span class="va">${SLURM_JOB_ID}</span><span class="st">.html&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-6"><a href="preproc.html#cb1-6" aria-hidden="true" tabindex="-1"></a>     <span class="op">&gt;</span> /dev/null</span></code></pre></div>
+<p>This will use the default quality filters and remove adapters based on
+pair overlap. Other filters may reduce throughput.</p>
+<p>Figure <a href="preproc.html#fig:fastpplot">1.1</a> shows that <code>fastp</code> is fast but parallel efficiency
+quickly drops beyond 6 threads. Therefore <code>fastp</code> should be limited to no more than
+6 threads. See table <a href="preproc.html#tab:fastptable">1.1</a> for a summary of throughput and efficiency.</p>
+
+<div class="figure" style="text-align: center"><span id="fig:fastpplot"></span>
+<img src="GATK_files/figure-html/fastpplot-1.png" alt="Throughput of fastp in read pairs per second as a function of the number of threads. Ideal scaling is shown as a dotted line." width="70%" />
+<p class="caption">
+Figure 1.1: Throughput of <code>fastp</code> in read pairs per second as a function of the number of threads. Ideal scaling is shown as a dotted line.
+</p>
+</div>
+<table>
+<caption><span id="tab:fastptable">Table 1.1: </span>fastp efficiency</caption>
+<thead>
+<tr class="header">
+<th align="right">threads</th>
+<th align="right">Efficiency [%]</th>
+<th align="right">pairs/s</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">2</td>
+<td align="right">100</td>
+<td align="right">49243</td>
+</tr>
+<tr class="even">
+<td align="right">4</td>
+<td align="right">109</td>
+<td align="right">107353</td>
+</tr>
+<tr class="odd">
+<td align="right">6</td>
+<td align="right">83</td>
+<td align="right">123228</td>
+</tr>
+<tr class="even">
+<td align="right">8</td>
+<td align="right">69</td>
+<td align="right">134955</td>
+</tr>
+<tr class="odd">
+<td align="right">10</td>
+<td align="right">60</td>
+<td align="right">148827</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="preproc-align" class="section level3" number="1.3.2">
+<h3><span class="header-section-number">1.3.2</span> Alignment</h3>
+<p>In this Section standalone <code>bwa</code> is used to produce the
+primary alignment. For the benchmark, <code>bwa</code> is fed separate FASTQ files from <code>lscratch</code>
+and outputs SAM format alignments to <code>/dev/null</code>. In the pipeline from later Section <a href="preproc.html#preproc-nosort-pipeline">1.4.2</a> it will ingest interleaved trimmed reads from <code>fastp</code> and output directly to <code>samtools</code>. Here is the <code>bwa</code> command
+used in the benchmarks:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="preproc.html#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem <span class="at">-M</span> <span class="at">-t</span> <span class="va">${threads}</span> <span class="dt">\</span></span>
+<span id="cb2-2"><a href="preproc.html#cb2-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">-R</span> <span class="st">&quot;@RG\tID:</span><span class="va">$id</span><span class="st">\tPL:ILLUMINA\tLB:</span><span class="va">$lb</span><span class="st">\tSM:</span><span class="va">$sm</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb2-3"><a href="preproc.html#cb2-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">$genome</span> <span class="dt">\</span></span>
+<span id="cb2-4"><a href="preproc.html#cb2-4" aria-hidden="true" tabindex="-1"></a>        /lscratch/<span class="va">$SLURM_JOBID</span>/<span class="va">$(</span><span class="fu">basename</span> <span class="va">${r1</span><span class="op">[</span>small<span class="op">]</span><span class="va">})</span> <span class="dt">\</span></span>
+<span id="cb2-5"><a href="preproc.html#cb2-5" aria-hidden="true" tabindex="-1"></a>        /lscratch/<span class="va">$SLURM_JOBID</span>/<span class="va">$(</span><span class="fu">basename</span> <span class="va">${r2</span><span class="op">[</span>small<span class="op">]</span><span class="va">})</span> <span class="dt">\</span></span>
+<span id="cb2-6"><a href="preproc.html#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">&gt;</span> /dev/null</span></code></pre></div>
+<p>Note that the content of the read group (<code>@RG</code>) SAM header field will be discussed in Section <a href="preproc.html#read-groups">1.5</a>.</p>
+<p>As for <code>fastp</code> all benchmarks were run on x2695 nodes. Figure <a href="preproc.html#fig:bwaplot">1.2</a> shows the scaling
+of <code>bwa</code> with increasing numbers of threads.
+<code>bwa</code> scales well to 32 threads (table <a href="preproc.html#tab:bwatable">1.2</a>).
+Even though <code>bwa</code> scales much better than <code>fastp</code> but it
+does much more computing per read pair it process much less reads per second than <code>fastp</code>. That means theoretically 2 threads of <code>fastp</code> (49243 pairs/s) are sufficient to feed 32 threads of <code>bwa</code> (22087 pairs/s).</p>
+
+<div class="figure" style="text-align: center"><span id="fig:bwaplot"></span>
+<img src="GATK_files/figure-html/bwaplot-1.png" alt="Throughput of bwa in read pairs per second as a function of the number of threads. Ideal scaling is shown as a dotted line." width="70%" />
+<p class="caption">
+Figure 1.2: Throughput of <code>bwa</code> in read pairs per second as a function of the number of threads. Ideal scaling is shown as a dotted line.
+</p>
+</div>
+<table>
+<caption><span id="tab:bwatable">Table 1.2: </span>BWA efficiency</caption>
+<thead>
+<tr class="header">
+<th align="right">threads</th>
+<th align="right">Efficiency [%]</th>
+<th align="right">pairs/s</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">2</td>
+<td align="right">100</td>
+<td align="right">1741</td>
+</tr>
+<tr class="even">
+<td align="right">4</td>
+<td align="right">89</td>
+<td align="right">3087</td>
+</tr>
+<tr class="odd">
+<td align="right">6</td>
+<td align="right">91</td>
+<td align="right">4761</td>
+</tr>
+<tr class="even">
+<td align="right">8</td>
+<td align="right">84</td>
+<td align="right">5865</td>
+</tr>
+<tr class="odd">
+<td align="right">10</td>
+<td align="right">96</td>
+<td align="right">8392</td>
+</tr>
+<tr class="even">
+<td align="right">12</td>
+<td align="right">88</td>
+<td align="right">9167</td>
+</tr>
+<tr class="odd">
+<td align="right">14</td>
+<td align="right">90</td>
+<td align="right">10915</td>
+</tr>
+<tr class="even">
+<td align="right">16</td>
+<td align="right">87</td>
+<td align="right">12085</td>
+</tr>
+<tr class="odd">
+<td align="right">24</td>
+<td align="right">86</td>
+<td align="right">18009</td>
+</tr>
+<tr class="even">
+<td align="right">32</td>
+<td align="right">79</td>
+<td align="right">22087</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="preproc-sort" class="section level3" number="1.3.3">
+<h3><span class="header-section-number">1.3.3</span> Alternative A: Sorting by coordinate</h3>
+<p>In the later alignment script @ref({#preproc-view}, the SAM output of <code>bwa</code> will be piped directly
+into <code>samtools</code> to avoid unnecessary writes to disk. However, to test <code>samtools</code> sort scaling in this Section,
+we use an unsorted BAM file as input. Not ideal but it will give us a good
+idea of <code>samtools</code> throughput and scaling. Note that <code>samtools</code> needs to spill temporary files to
+disk if the alignment does not fit in memory which will generally be the case for whole genome
+alignments. To improve performance and avoid unnecessary load on the shared file systems, it
+is very important to use <code>lscratch</code> for these temporary files.</p>
+<p>The <code>samtools</code> command in the tests:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="preproc.html#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> sort <span class="at">-T</span> /lscratch/<span class="va">$SLURM_JOBID</span>/part <span class="dt">\</span></span>
+<span id="cb3-2"><a href="preproc.html#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">-m</span> <span class="va">${mem_mb_per_thread}</span>M <span class="dt">\</span></span>
+<span id="cb3-3"><a href="preproc.html#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">-@</span> <span class="va">${threads}</span> <span class="dt">\</span></span>
+<span id="cb3-4"><a href="preproc.html#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">-O</span> BAM <span class="dt">\</span></span>
+<span id="cb3-5"><a href="preproc.html#cb3-5" aria-hidden="true" tabindex="-1"></a>    /lscratch/<span class="va">$SLURM_JOBID</span>/<span class="va">$(</span><span class="fu">basename</span> <span class="va">$bam)</span> <span class="dt">\</span></span>
+<span id="cb3-6"><a href="preproc.html#cb3-6" aria-hidden="true" tabindex="-1"></a>     <span class="op">&gt;</span> /dev/null</span></code></pre></div>
+<p>Notes:</p>
+<ul>
+<li>The input BAM file was 32GB located in <code>lscratch</code>.</li>
+<li>Temporary files were stored in <code>lscratch</code>.</li>
+<li>Output was discarded.</li>
+<li>For these benchmarks the sort was run with different amount of total memory
+(10GiB, 20GiB, and 30GiB) and different numbers of threads.</li>
+<li>The amount of temporary space on <code>lscratch</code> used was about 1.5x that of the input
+BAM file and 1.75x that of the input compressed FASTQ files.</li>
+<li>The job was allocated about 5GB more memory than <code>threads * mem_per_thread</code> to avoid
+out of memory kills (i.e. 15GB, etc.).</li>
+</ul>
+
+<div class="figure" style="text-align: center"><span id="fig:samtoolsplot"></span>
+<img src="GATK_files/figure-html/samtoolsplot-1.png" alt="Throughput of samtools sort in read pairs per second as a function of the number of threads. Ideal scaling is shown as a dotted line." width="70%" />
+<p class="caption">
+Figure 1.3: Throughput of <code>samtools sort</code> in read pairs per second as a function of the number of threads. Ideal scaling is shown as a dotted line.
+</p>
+</div>
+<p>Figure <a href="preproc.html#fig:samtoolsplot">1.3</a> shows that <code>samtools sort</code> scales efficiently up to 10 threads
+in this test and that the amount of total memory across all threads did not result in measurably
+different performance.</p>
+<table>
+<caption><span id="tab:samtoolstable">Table 1.3: </span>samtools efficiency</caption>
+<thead>
+<tr class="header">
+<th align="right">threads</th>
+<th align="right">Efficiency [%]</th>
+<th align="right">pairs/s</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">2</td>
+<td align="right">100</td>
+<td align="right">24232</td>
+</tr>
+<tr class="even">
+<td align="right">4</td>
+<td align="right">102</td>
+<td align="right">49383</td>
+</tr>
+<tr class="odd">
+<td align="right">6</td>
+<td align="right">94</td>
+<td align="right">68466</td>
+</tr>
+<tr class="even">
+<td align="right">8</td>
+<td align="right">99</td>
+<td align="right">95778</td>
+</tr>
+<tr class="odd">
+<td align="right">10</td>
+<td align="right">88</td>
+<td align="right">106872</td>
+</tr>
+<tr class="even">
+<td align="right">12</td>
+<td align="right">79</td>
+<td align="right">114514</td>
+</tr>
+<tr class="odd">
+<td align="right">14</td>
+<td align="right">79</td>
+<td align="right">133980</td>
+</tr>
+<tr class="even">
+<td align="right">16</td>
+<td align="right">63</td>
+<td align="right">121872</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="preproc-view" class="section level3" number="1.3.4">
+<h3><span class="header-section-number">1.3.4</span> Alternative B: Queryname-grouped (unsorted) BAM</h3>
+<p>In the later alignment script @ref({#preproc-view}, the SAM output of <code>bwa</code> will be piped directly
+into <code>samtools</code> to avoid unnecessary writes to disk. Unlike in
+<a href="preproc.html#preproc-sort">1.3.3</a> in this test the SAM file is converted to a BAM file
+without sorting (queries with the same name are grouped) for further processing
+as described in Chapter <a href="markdup.html#markdup">3</a>.</p>
+<p>The <code>samtools</code> command in the tests:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="preproc.html#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> view <span class="at">-@</span> <span class="va">${threads}</span> <span class="dt">\</span></span>
+<span id="cb4-2"><a href="preproc.html#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">-O</span> BAM <span class="dt">\</span></span>
+<span id="cb4-3"><a href="preproc.html#cb4-3" aria-hidden="true" tabindex="-1"></a>    /lscratch/\$SLURM_JOBID/<span class="va">$(</span><span class="fu">basename</span> <span class="va">$sam)</span> <span class="dt">\</span></span>
+<span id="cb4-4"><a href="preproc.html#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">&gt;</span> /dev/null</span></code></pre></div>
+<p>Notes:</p>
+<ul>
+<li>The input SAM file was 29GB located in <code>lscratch</code>.</li>
+<li>Output was discarded.</li>
+<li><code>samtools view</code> uses comparatively little memory, 4GB in the tests.</li>
+</ul>
+
+<div class="figure" style="text-align: center"><span id="fig:samtoolsplotvo"></span>
+<img src="GATK_files/figure-html/samtoolsplotvo-1.png" alt="Throughput of samtools view in read pairs per second as a function of the number of threads. Ideal scaling is shown as a dotted line." width="70%" />
+<p class="caption">
+Figure 1.4: Throughput of <code>samtools view</code> in read pairs per second as a function of the number of threads. Ideal scaling is shown as a dotted line.
+</p>
+</div>
+<p>Figure <a href="preproc.html#fig:samtoolsplotvo">1.4</a> shows that <code>samtools view</code> scales efficiently all
+the way to 16 threads, the largest number of threads tested.</p>
+<table>
+<caption><span id="tab:samtoolstablevo">Table 1.4: </span>samtools efficiency</caption>
+<thead>
+<tr class="header">
+<th align="right">threads</th>
+<th align="right">Efficiency [%]</th>
+<th align="right">pairs/s</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">2</td>
+<td align="right">100</td>
+<td align="right">35000</td>
+</tr>
+<tr class="even">
+<td align="right">4</td>
+<td align="right">99</td>
+<td align="right">69346</td>
+</tr>
+<tr class="odd">
+<td align="right">6</td>
+<td align="right">104</td>
+<td align="right">109026</td>
+</tr>
+<tr class="even">
+<td align="right">8</td>
+<td align="right">86</td>
+<td align="right">119928</td>
+</tr>
+<tr class="odd">
+<td align="right">10</td>
+<td align="right">85</td>
+<td align="right">148816</td>
+</tr>
+<tr class="even">
+<td align="right">12</td>
+<td align="right">95</td>
+<td align="right">199880</td>
+</tr>
+<tr class="odd">
+<td align="right">14</td>
+<td align="right">91</td>
+<td align="right">224042</td>
+</tr>
+<tr class="even">
+<td align="right">16</td>
+<td align="right">94</td>
+<td align="right">263068</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="optimized-script" class="section level2" number="1.4">
+<h2><span class="header-section-number">1.4</span> Optimized script</h2>
+<p>Based on the individual benchmarks from Section <a href="preproc.html#preproc-single-tools">1.3</a> we
+can design an efficient combined pipeline with each
+tool running at &gt; 80% parallel efficiency.</p>
+<div id="alternative-a-producing-sorted-bam-output" class="section level3" number="1.4.1">
+<h3><span class="header-section-number">1.4.1</span> Alternative A: producing sorted BAM output</h3>
+<ul>
+<li>2 threads of <code>fastp</code> piping interleaved read pairs to <code>bwa</code>.</li>
+<li>32 threads of <code>bwa</code> piping output.</li>
+<li>12 threads of <code>samtools</code> with 20GB of memory; temporary files in <code>lscratch</code>.</li>
+</ul>
+<p>In code:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="preproc.html#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">fastp</span> <span class="at">-i</span> <span class="va">$read1</span> <span class="at">-I</span> <span class="va">$read2</span> <span class="dt">\</span></span>
+<span id="cb5-2"><a href="preproc.html#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">--stdout</span> <span class="at">--thread</span> 2 <span class="dt">\</span></span>
+<span id="cb5-3"><a href="preproc.html#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">-j</span> <span class="st">&quot;</span><span class="va">${logs}</span><span class="st">/fastp-</span><span class="va">${SLURM_JOB_ID}</span><span class="st">.json&quot;</span> <span class="dt">\</span></span>
+<span id="cb5-4"><a href="preproc.html#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">-h</span> <span class="st">&quot;</span><span class="va">${logs}</span><span class="st">/fastp-</span><span class="va">${SLURM_JOB_ID}</span><span class="st">.html&quot;</span> <span class="dt">\</span></span>
+<span id="cb5-5"><a href="preproc.html#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span><span class="op">&gt;</span> <span class="st">&quot;</span><span class="va">${logs}</span><span class="st">/fastp-</span><span class="va">${SLURM_JOB_ID}</span><span class="st">.log&quot;</span> <span class="dt">\</span></span>
+<span id="cb5-6"><a href="preproc.html#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span> <span class="ex">bwa</span> mem <span class="at">-v</span> 2 <span class="at">-M</span> <span class="at">-t</span> 32 <span class="at">-p</span> <span class="dt">\</span></span>
+<span id="cb5-7"><a href="preproc.html#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">-R</span> <span class="st">&quot;@RG\tID:</span><span class="va">$id</span><span class="st">\tPL:ILLUMINA\tLB:</span><span class="va">$lb</span><span class="st">\tSM:</span><span class="va">$sm</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb5-8"><a href="preproc.html#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="va">$genome</span> <span class="at">-</span> <span class="dv">2</span><span class="op">&gt;</span> <span class="va">${logs}</span>/bwa-<span class="va">${SLURM_JOB_ID}</span>.log <span class="dt">\</span></span>
+<span id="cb5-9"><a href="preproc.html#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span> <span class="ex">samtools</span> sort <span class="at">-T</span> /lscratch/<span class="va">$SLURM_JOBID</span>/part <span class="dt">\</span></span>
+<span id="cb5-10"><a href="preproc.html#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">-m</span> 1706M <span class="dt">\</span></span>
+<span id="cb5-11"><a href="preproc.html#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">-@</span> 12 <span class="dt">\</span></span>
+<span id="cb5-12"><a href="preproc.html#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">-O</span> BAM <span class="dt">\</span></span>
+<span id="cb5-13"><a href="preproc.html#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">-o</span> /lscratch/<span class="va">$SLURM_JOBID</span>/<span class="va">$bam</span> <span class="dt">\</span></span>
+<span id="cb5-14"><a href="preproc.html#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span><span class="op">&gt;</span> <span class="va">${logs}</span>/samtools-<span class="va">${SLURM_JOB_ID}</span>.log</span></code></pre></div>
+<p>For an input file with 201,726,334 read pairs we would expect a runtime of
+about 2.5h given the rate limits of ~22,000 pairs/sec in the
+alignment step. Since we are not sure about the total memory usage, we run
+this job with 46 CPUs and 70GB. Figure <a href="preproc.html#fig:samtoolsts">1.5</a> shows the memory
+and CPU usage.</p>
+<div class="figure" style="text-align: center"><span id="fig:samtoolsts"></span>
+<img src="images/01-preproc-first-script.png" alt="First implementation of combined preprocessing script" width="744" />
+<p class="caption">
+Figure 1.5: First implementation of combined preprocessing script
+</p>
+</div>
+<p>Some observations:</p>
+<ul>
+<li>Memory usage peaked just above 60GB.</li>
+<li>The code used only 32 CPUs most the time. This has to do with the fact that
+<code>bwa</code> and <code>samtools</code> don’t generally use lots of CPU at the same time. <code>samtools</code>
+accumulates alignments until its buffers are full and then sorts. While it sorts
+<code>bwa</code> will use less CPU.</li>
+<li>The throughput of this run was similar to the throughput of <code>bwa</code> alone - about 20-24k
+read pairs per second.</li>
+</ul>
+<p>The code above was run on 32 to 48 CPUs to see if throughput
+could be maintained at reduced core count. As can be seen in figure <a href="preproc.html#fig:preproc04plot">1.6</a> (A)
+the throughput does increase linearly with the number of allocated CPUs from 32 to 48. However
+the increase is modest and efficiency, as measured in reads per second per CPU, decreases from 34 to 48 CPUs (figure <a href="preproc.html#fig:preproc04plot">1.6</a> (B).</p>
+
+<div class="figure" style="text-align: center"><span id="fig:preproc04plot"></span>
+<img src="GATK_files/figure-html/preproc04plot-1.png" alt="(A) Gross throughput in reads/s of the combined preprocessing pipeline from FASTQ to sorted alignments in a BAM file. The total thread count across all three tools. (B) Like the plot on the left but showing Reads/s/cpu, a measure of efficiency." width="50%" /><img src="GATK_files/figure-html/preproc04plot-2.png" alt="(A) Gross throughput in reads/s of the combined preprocessing pipeline from FASTQ to sorted alignments in a BAM file. The total thread count across all three tools. (B) Like the plot on the left but showing Reads/s/cpu, a measure of efficiency." width="50%" />
+<p class="caption">
+Figure 1.6: <strong>(A)</strong> Gross throughput in reads/s of the combined preprocessing pipeline from FASTQ to sorted alignments in a BAM file. The total thread count across all three tools. <strong>(B)</strong> Like the plot on the left but showing Reads/s/cpu, a measure of efficiency.
+</p>
+</div>
+<p>Based on this test we conclude that running the combined preprocessing steps with 46 threads on
+34 CPUs is the most efficient approach and only results in a 12% increase of the runtime compared to
+46 CPUs.</p>
+</div>
+<div id="preproc-nosort-pipeline" class="section level3" number="1.4.2">
+<h3><span class="header-section-number">1.4.2</span> Alternative B: BAM output without coordinate sorting</h3>
+<ul>
+<li>2 threads of <code>fastp</code> piping interleaved read pairs to <code>bwa</code>.</li>
+<li>32 threads of <code>bwa</code> piping output.</li>
+<li>16 threads of <code>samtools</code>.</li>
+</ul>
+<p>In code:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="preproc.html#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">fastp</span> <span class="at">-i</span> <span class="va">$read1</span> <span class="at">-I</span> <span class="va">$read2</span> <span class="dt">\</span></span>
+<span id="cb6-2"><a href="preproc.html#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">--stdout</span> <span class="at">--thread</span> 2 <span class="dt">\</span></span>
+<span id="cb6-3"><a href="preproc.html#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">-j</span> <span class="st">&quot;</span><span class="va">${logs}</span><span class="st">/fastp-</span><span class="va">${SLURM_JOB_ID}</span><span class="st">.json&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-4"><a href="preproc.html#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">-h</span> <span class="st">&quot;</span><span class="va">${logs}</span><span class="st">/fastp-</span><span class="va">${SLURM_JOB_ID}</span><span class="st">.html&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-5"><a href="preproc.html#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span><span class="op">&gt;</span> <span class="st">&quot;</span><span class="va">${logs}</span><span class="st">/fastp-</span><span class="va">${SLURM_JOB_ID}</span><span class="st">.log&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-6"><a href="preproc.html#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span> <span class="ex">bwa</span> mem <span class="at">-v</span> 2 <span class="at">-M</span> <span class="at">-t</span> 32 <span class="at">-p</span> <span class="dt">\</span></span>
+<span id="cb6-7"><a href="preproc.html#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">-R</span> <span class="st">&quot;@RG\tID:</span><span class="va">$id</span><span class="st">\tPL:ILLUMINA\tLB:</span><span class="va">$lb</span><span class="st">\tSM:</span><span class="va">$sm</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-8"><a href="preproc.html#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="va">$genome</span> <span class="at">-</span> <span class="dv">2</span><span class="op">&gt;</span> <span class="va">${logs}</span>/bwa-<span class="va">${SLURM_JOB_ID}</span>.log <span class="dt">\</span></span>
+<span id="cb6-9"><a href="preproc.html#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span> <span class="ex">samtools</span> view <span class="at">-@</span> 16 <span class="dt">\</span></span>
+<span id="cb6-10"><a href="preproc.html#cb6-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">-O</span> BAM <span class="dt">\</span></span>
+<span id="cb6-11"><a href="preproc.html#cb6-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">-o</span> /lscratch/<span class="va">$SLURM_JOBID</span>/<span class="va">$bam</span> <span class="dt">\</span></span>
+<span id="cb6-12"><a href="preproc.html#cb6-12" aria-hidden="true" tabindex="-1"></a>        <span class="dv">2</span><span class="op">&gt;</span> <span class="va">${logs}</span>/samtools-<span class="va">${SLURM_JOB_ID}</span>.log</span></code></pre></div>
+<p>For an input file with 201,726,334 read pairs we would expect a runtime of
+about 2.5h given the rate limits of ~22,000 pairs/sec in the
+alignment step. Some initial experiments showed that 42GB of memory were
+required for all test jobs to finish. As for alternative A we tested
+different numbers of CPUs - from a full allocation of 50 CPUs down to
+32 CPUs to account for the fact that all three tools don’t operate at
+full capacity all the time.</p>
+<p>As can be seen in figure <a href="preproc.html#fig:preproc05plot">1.7</a> A
+the throughput does increase linearly with the number of allocated CPUs from 32 to 50. However
+the increase is modest and efficiency, as measured in reads per second per CPU decreases from 36 to 50 CPUs (figure <a href="preproc.html#fig:preproc05plot">1.7</a> B).</p>
+
+<div class="figure" style="text-align: center"><span id="fig:preproc05plot"></span>
+<img src="GATK_files/figure-html/preproc05plot-1.png" alt="(A) Gross throughput in reads/s of the combined preprocessing pipeline from FASTQ to alignments in a BAM file. The total thread count across all three tools. (B) Like the plot on the left but showing Reads/s/cpu, a measure of efficiency." width="50%" /><img src="GATK_files/figure-html/preproc05plot-2.png" alt="(A) Gross throughput in reads/s of the combined preprocessing pipeline from FASTQ to alignments in a BAM file. The total thread count across all three tools. (B) Like the plot on the left but showing Reads/s/cpu, a measure of efficiency." width="50%" />
+<p class="caption">
+Figure 1.7: <strong>(A)</strong> Gross throughput in reads/s of the combined preprocessing pipeline from FASTQ to alignments in a BAM file. The total thread count across all three tools. <strong>(B)</strong> Like the plot on the left but showing Reads/s/cpu, a measure of efficiency.
+</p>
+</div>
+<p>Based on this test we conclude that running the combined preprocessing steps with 50 threads on
+34 CPUs is the most efficient approach.</p>
+</div>
+</div>
+<div id="read-groups" class="section level2" number="1.5">
+<h2><span class="header-section-number">1.5</span> Read groups</h2>
+<p>The SAM <a href="https://samtools.github.io/hts-specs/SAMv1.pdf">format specification</a> uses read groups
+(the <code>@RG</code> header) to associate reads with with different sources (flowcells, lanes, libraries, etc.).
+Downstream tools use this information as co-variates when modeling errors. However,
+read groups is used slightly differently by different tools. See how
+<a href="https://gatk.broadinstitute.org/hc/en-us/articles/360035890671-Read-groups">GATK</a> and
+<a href="https://support.sentieon.com/appnotes/read_groups/">sentieon</a> recommend using read groups.</p>
+<p>In this example there are 4 lanes of HiSeq 2000 data for each sample spread across a number of
+flow cells. The unique read group id for each lane is <code>sample.flowcell.lane.acc</code>.</p>
+</div>
+<div id="processing-the-example-trio" class="section level2" number="1.6">
+<h2><span class="header-section-number">1.6</span> Processing the example trio</h2>
+<p>Example scripts that implement the optimized approaches from both alternatives described
+above is available for download <a href="GATK_files/trio_tutorial.tgz">here</a>.</p>
+<p>The 4 lanes of sequencing data for each of the three samples in our example trio can
+be trimmed, aligned, and sorted as shown below.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="preproc.html#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tar</span> <span class="at">-xzf</span> trio_tutoria.tgz</span>
+<span id="cb7-2"><a href="preproc.html#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">module</span> load jq</span>
+<span id="cb7-3"><a href="preproc.html#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> trio_tutorial/01-preproc</span>
+<span id="cb7-4"><a href="preproc.html#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sample <span class="kw">in</span> NA12878 NA12891 NA12892 <span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb7-5"><a href="preproc.html#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">[[</span> <span class="ot">-e</span> <span class="va">${sample}</span>.json <span class="kw">]]</span> <span class="kw">||</span> <span class="ex">./mkconfig</span> <span class="va">$sample</span> <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.&#39;</span> <span class="op">&gt;</span> <span class="va">${sample}</span>.json</span>
+<span id="cb7-6"><a href="preproc.html#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb7-7"><a href="preproc.html#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="preproc.html#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">### check out the created config files</span></span>
+<span id="cb7-9"><a href="preproc.html#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">### then submit jobs</span></span>
+<span id="cb7-10"><a href="preproc.html#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="preproc.html#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> data</span>
+<span id="cb7-12"><a href="preproc.html#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sample <span class="kw">in</span> NA12878 NA12891 NA12892 <span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb7-13"><a href="preproc.html#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># data below are for sorted output. You can choose the unsorted script</span></span>
+<span id="cb7-14"><a href="preproc.html#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># instead</span></span>
+<span id="cb7-15"><a href="preproc.html#cb7-15" aria-hidden="true" tabindex="-1"></a>    <span class="ex">sbatch</span> ./01-preproc.sh <span class="va">${sample}</span>.json <span class="dt">\</span></span>
+<span id="cb7-16"><a href="preproc.html#cb7-16" aria-hidden="true" tabindex="-1"></a>        /fdb/GATK_resource_bundle/hg38-v0/Homo_sapiens_assembly38.fasta <span class="dt">\</span></span>
+<span id="cb7-17"><a href="preproc.html#cb7-17" aria-hidden="true" tabindex="-1"></a>        data/<span class="va">${sample}</span>.bam</span>
+<span id="cb7-18"><a href="preproc.html#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<p>Logfiles, diagnostic files, and sorted BAM files will be saved in <code>./data/</code>. The jobs were not
+constrained to a specific node type but some basic stats of the full runs of this Chapter are summarized
+below (for sorted BAM output):</p>
+<table>
+<thead>
+<tr class="header">
+<th align="right">Sample</th>
+<th align="right">Runtime</th>
+<th align="right">BAM file size</th>
+<th align="right">Mean coverage</th>
+<th align="right">CPUh</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">NA12891</td>
+<td align="right">11.5h</td>
+<td align="right">115GB</td>
+<td align="right">47x</td>
+<td align="right">391</td>
+</tr>
+<tr class="even">
+<td align="right">NA12892</td>
+<td align="right">11.7h</td>
+<td align="right">125GB</td>
+<td align="right">51x</td>
+<td align="right">398</td>
+</tr>
+<tr class="odd">
+<td align="right">NA12878</td>
+<td align="right">11.5h</td>
+<td align="right">120GB</td>
+<td align="right">47.4x</td>
+<td align="right">391</td>
+</tr>
+</tbody>
+</table>
+<p><code>mosdepth</code> is a good tool to look at coverage across all sites:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="preproc.html#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> mosdepth</span>
+<span id="cb8-2"><a href="preproc.html#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="preproc.html#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">MOSDEPTH_Q0</span><span class="op">=</span>NO_COVERAGE   <span class="co"># 0 -- defined by the arguments to --quantize</span></span>
+<span id="cb8-4"><a href="preproc.html#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">MOSDEPTH_Q1</span><span class="op">=</span>LOW_COVERAGE  <span class="co"># 1..4</span></span>
+<span id="cb8-5"><a href="preproc.html#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">MOSDEPTH_Q2</span><span class="op">=</span>CALLABLE      <span class="co"># 5..149</span></span>
+<span id="cb8-6"><a href="preproc.html#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">MOSDEPTH_Q3</span><span class="op">=</span>HIGH_COVERAGE <span class="co"># 150 ...</span></span>
+<span id="cb8-7"><a href="preproc.html#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="preproc.html#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="ex">module</span> load mosdepth/0.3.0</span>
+<span id="cb8-9"><a href="preproc.html#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sample <span class="kw">in</span> NA12891 NA12892 NA12878 <span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb8-10"><a href="preproc.html#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">[[</span> <span class="ot">-e</span> mosdepth/<span class="va">${sample}</span>.quantized.mosdepth.summary.txt <span class="kw">]]</span> <span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb8-11"><a href="preproc.html#cb8-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">printf</span> <span class="st">&quot;skipping %s - already done\n&quot;</span> <span class="st">&quot;</span><span class="va">$sample</span><span class="st">&quot;</span></span>
+<span id="cb8-12"><a href="preproc.html#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span></span>
+<span id="cb8-13"><a href="preproc.html#cb8-13" aria-hidden="true" tabindex="-1"></a>        <span class="ex">mosdepth</span> <span class="at">-t3</span> <span class="at">-n</span> <span class="at">--quantize</span> 0:1:5:150: mosdepth/<span class="va">$sample</span>.quantized data/<span class="va">$sample</span>.bam</span>
+<span id="cb8-14"><a href="preproc.html#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">fi</span></span>
+<span id="cb8-15"><a href="preproc.html#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<p>Figure <a href="preproc.html#fig:preprocmosdepth">1.8</a> (A) shows coverage of all autosomes for the three samples.
+Figure <a href="preproc.html#fig:preprocmosdepth">1.8</a> (B) shows coverage of X and Y chromosomes consistent with
+the expected sex.</p>
+<div class="figure" style="text-align: center"><span id="fig:preprocmosdepth"></span>
+<img src="images/01-preproc-mosdepth-auto.png" alt="Coverage of **(A)** autosomes and **(B)** sex chromosomes" width="1050" /><img src="images/01-preproc-mosdepth-sex.png" alt="Coverage of **(A)** autosomes and **(B)** sex chromosomes" width="1050" />
+<p class="caption">
+Figure 1.8: Coverage of <strong>(A)</strong> autosomes and <strong>(B)</strong> sex chromosomes
+</p>
+</div>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="workflow-overview.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["GATK.pdf", "GATK.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

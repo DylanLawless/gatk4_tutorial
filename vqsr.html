@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 8 VQSR | A practical introduction to GATK 4 on Biowulf (NIH HPC)</title>
+  <meta name="description" content="Chapter 8 VQSR | A practical introduction to GATK 4 on Biowulf (NIH HPC)" />
+  <meta name="generator" content="bookdown 0.22 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 8 VQSR | A practical introduction to GATK 4 on Biowulf (NIH HPC)" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 8 VQSR | A practical introduction to GATK 4 on Biowulf (NIH HPC)" />
+  
+  
+  
+
+<meta name="author" content="Qi Yu and Wolfgang Resch" />
+
+
+<meta name="date" content="2021-06-15" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="genotype-gvcfs.html"/>
+<link rel="next" href="gt-posteriors.html"/>
+<script src="libs/header-attrs-2.8/header-attrs.js"></script>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">GATK on biowulf</a></li>
+<li class="toc-logo"><a href="./"><img src="images/Biowulf_Logo_RGB_Cyan_Blue.png" height=42></a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Prerequisites</a>
+<ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#software"><i class="fa fa-check"></i>Software</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#sequencing-data"><i class="fa fa-check"></i>Sequencing data</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="preproc.html"><a href="preproc.html"><i class="fa fa-check"></i><b>1</b> Data preprocessing</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="preproc.html"><a href="preproc.html#brief-introduction"><i class="fa fa-check"></i><b>1.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="1.2" data-path="preproc.html"><a href="preproc.html#preproc-tools"><i class="fa fa-check"></i><b>1.2</b> Tools</a></li>
+<li class="chapter" data-level="1.3" data-path="preproc.html"><a href="preproc.html#preproc-single-tools"><i class="fa fa-check"></i><b>1.3</b> Individual tool benchmarks</a>
+<ul>
+<li class="chapter" data-level="1.3.1" data-path="preproc.html"><a href="preproc.html#preproc-trim"><i class="fa fa-check"></i><b>1.3.1</b> Adapter trimming</a></li>
+<li class="chapter" data-level="1.3.2" data-path="preproc.html"><a href="preproc.html#preproc-align"><i class="fa fa-check"></i><b>1.3.2</b> Alignment</a></li>
+<li class="chapter" data-level="1.3.3" data-path="preproc.html"><a href="preproc.html#preproc-sort"><i class="fa fa-check"></i><b>1.3.3</b> Alternative A: Sorting by coordinate</a></li>
+<li class="chapter" data-level="1.3.4" data-path="preproc.html"><a href="preproc.html#preproc-view"><i class="fa fa-check"></i><b>1.3.4</b> Alternative B: Queryname-grouped (unsorted) BAM</a></li>
+</ul></li>
+<li class="chapter" data-level="1.4" data-path="preproc.html"><a href="preproc.html#optimized-script"><i class="fa fa-check"></i><b>1.4</b> Optimized script</a>
+<ul>
+<li class="chapter" data-level="1.4.1" data-path="preproc.html"><a href="preproc.html#alternative-a-producing-sorted-bam-output"><i class="fa fa-check"></i><b>1.4.1</b> Alternative A: producing sorted BAM output</a></li>
+<li class="chapter" data-level="1.4.2" data-path="preproc.html"><a href="preproc.html#preproc-nosort-pipeline"><i class="fa fa-check"></i><b>1.4.2</b> Alternative B: BAM output without coordinate sorting</a></li>
+</ul></li>
+<li class="chapter" data-level="1.5" data-path="preproc.html"><a href="preproc.html#read-groups"><i class="fa fa-check"></i><b>1.5</b> Read groups</a></li>
+<li class="chapter" data-level="1.6" data-path="preproc.html"><a href="preproc.html#processing-the-example-trio"><i class="fa fa-check"></i><b>1.6</b> Processing the example trio</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="workflow-overview.html"><a href="workflow-overview.html"><i class="fa fa-check"></i><b>2</b> GATK practice workflow</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="workflow-overview.html"><a href="workflow-overview.html#cleaning-up-raw-alignments"><i class="fa fa-check"></i><b>2.1</b> Cleaning up raw alignments</a></li>
+<li class="chapter" data-level="2.2" data-path="workflow-overview.html"><a href="workflow-overview.html#joint-calling"><i class="fa fa-check"></i><b>2.2</b> Joint Calling</a></li>
+<li class="chapter" data-level="2.3" data-path="workflow-overview.html"><a href="workflow-overview.html#variant-filtering"><i class="fa fa-check"></i><b>2.3</b> Variant filtering</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="markdup.html"><a href="markdup.html"><i class="fa fa-check"></i><b>3</b> MarkDuplicates</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="markdup.html"><a href="markdup.html#brief-introduction-1"><i class="fa fa-check"></i><b>3.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="3.2" data-path="markdup.html"><a href="markdup.html#benchmarks-of-markduplicatesspark"><i class="fa fa-check"></i><b>3.2</b> Benchmarks of <code>MarkDuplicatesSpark</code></a>
+<ul>
+<li class="chapter" data-level="3.2.1" data-path="markdup.html"><a href="markdup.html#queryname-grouped-input-data-as-generated-by-the-aligner"><i class="fa fa-check"></i><b>3.2.1</b> Queryname-grouped input data (as generated by the aligner)</a></li>
+<li class="chapter" data-level="3.2.2" data-path="markdup.html"><a href="markdup.html#coordinate-sorted-input-data"><i class="fa fa-check"></i><b>3.2.2</b> Coordinate-sorted input data</a></li>
+<li class="chapter" data-level="3.2.3" data-path="markdup.html"><a href="markdup.html#performance-comparing-between-queryname-grouped-and-coordinate-sorted-inputs"><i class="fa fa-check"></i><b>3.2.3</b> Performance comparing between queryname-grouped and coordinate-sorted inputs</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="markdup.html"><a href="markdup.html#optimized-script-1"><i class="fa fa-check"></i><b>3.3</b> Optimized script</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="bqsr.html"><a href="bqsr.html"><i class="fa fa-check"></i><b>4</b> BQSR</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="bqsr.html"><a href="bqsr.html#brief-introduction-2"><i class="fa fa-check"></i><b>4.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="4.2" data-path="bqsr.html"><a href="bqsr.html#benchmarks-of-baserecalibrator"><i class="fa fa-check"></i><b>4.2</b> Benchmarks of <code>BaseRecalibrator</code></a></li>
+<li class="chapter" data-level="4.3" data-path="bqsr.html"><a href="bqsr.html#optimized-script-for-baserecalibrator"><i class="fa fa-check"></i><b>4.3</b> Optimized script for <code>BaseRecalibrator</code></a></li>
+<li class="chapter" data-level="4.4" data-path="bqsr.html"><a href="bqsr.html#benchmarks-of-applybqsr"><i class="fa fa-check"></i><b>4.4</b> Benchmarks of <code>ApplyBQSR</code></a></li>
+<li class="chapter" data-level="4.5" data-path="bqsr.html"><a href="bqsr.html#optimized-script-for-applybqsr"><i class="fa fa-check"></i><b>4.5</b> Optimized script for <code>ApplyBQSR</code></a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="haplotype-caller.html"><a href="haplotype-caller.html"><i class="fa fa-check"></i><b>5</b> HaplotypeCaller</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="haplotype-caller.html"><a href="haplotype-caller.html#brief-introduction-3"><i class="fa fa-check"></i><b>5.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="5.2" data-path="haplotype-caller.html"><a href="haplotype-caller.html#benchmarks"><i class="fa fa-check"></i><b>5.2</b> Benchmarks</a></li>
+<li class="chapter" data-level="5.3" data-path="haplotype-caller.html"><a href="haplotype-caller.html#optimized-script-2"><i class="fa fa-check"></i><b>5.3</b> Optimized script</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="genomics-db-import.html"><a href="genomics-db-import.html"><i class="fa fa-check"></i><b>6</b> GenomicsDBImport (replaces CombineGVCFs)</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="genomics-db-import.html"><a href="genomics-db-import.html#brief-introduction-4"><i class="fa fa-check"></i><b>6.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="6.2" data-path="genomics-db-import.html"><a href="genomics-db-import.html#benchmarks-1"><i class="fa fa-check"></i><b>6.2</b> Benchmarks</a></li>
+<li class="chapter" data-level="6.3" data-path="genomics-db-import.html"><a href="genomics-db-import.html#optimized-script-3"><i class="fa fa-check"></i><b>6.3</b> Optimized script</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="genotype-gvcfs.html"><a href="genotype-gvcfs.html"><i class="fa fa-check"></i><b>7</b> GenotypeGVCFs</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="genotype-gvcfs.html"><a href="genotype-gvcfs.html#brief-introduction-5"><i class="fa fa-check"></i><b>7.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="7.2" data-path="genotype-gvcfs.html"><a href="genotype-gvcfs.html#benchmarks-2"><i class="fa fa-check"></i><b>7.2</b> Benchmarks</a></li>
+<li class="chapter" data-level="7.3" data-path="genotype-gvcfs.html"><a href="genotype-gvcfs.html#optimized-script-4"><i class="fa fa-check"></i><b>7.3</b> Optimized script</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="vqsr.html"><a href="vqsr.html"><i class="fa fa-check"></i><b>8</b> VQSR</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="vqsr.html"><a href="vqsr.html#brief-introduction-6"><i class="fa fa-check"></i><b>8.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="8.2" data-path="vqsr.html"><a href="vqsr.html#benchmarks-of-variantrecalibrator"><i class="fa fa-check"></i><b>8.2</b> Benchmarks of <code>VariantRecalibrator</code></a></li>
+<li class="chapter" data-level="8.3" data-path="vqsr.html"><a href="vqsr.html#optimized-script-for-variantrecalibrator"><i class="fa fa-check"></i><b>8.3</b> Optimized script for <code>VariantRecalibrator</code></a></li>
+<li class="chapter" data-level="8.4" data-path="vqsr.html"><a href="vqsr.html#benchmarks-of-applyvqsr"><i class="fa fa-check"></i><b>8.4</b> Benchmarks of <code>ApplyVQSR</code></a></li>
+<li class="chapter" data-level="8.5" data-path="vqsr.html"><a href="vqsr.html#optimized-script-for-applyvqsr"><i class="fa fa-check"></i><b>8.5</b> Optimized script for <code>ApplyVQSR</code></a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="gt-posteriors.html"><a href="gt-posteriors.html"><i class="fa fa-check"></i><b>9</b> Calculate genotype posteriors</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="gt-posteriors.html"><a href="gt-posteriors.html#brief-introduction-7"><i class="fa fa-check"></i><b>9.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="9.2" data-path="gt-posteriors.html"><a href="gt-posteriors.html#benchmarks-3"><i class="fa fa-check"></i><b>9.2</b> Benchmarks</a></li>
+<li class="chapter" data-level="9.3" data-path="gt-posteriors.html"><a href="gt-posteriors.html#optimized-script-5"><i class="fa fa-check"></i><b>9.3</b> Optimized script</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">A practical introduction to GATK 4 on Biowulf (NIH HPC)</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="vqsr" class="section level1" number="8">
+<h1><span class="header-section-number">Chapter 8</span> VQSR</h1>
+<div id="brief-introduction-6" class="section level2" number="8.1">
+<h2><span class="header-section-number">8.1</span> Brief introduction</h2>
+<p>Raw variant calls include many artifacts.</p>
+<p>The core algorithm in VQSR is a Gaussian mixture model that aims to classify
+variants based on how their annotation values cluster given a training set of
+high-confidence variants.</p>
+<p>Then the VQSR tools use this model to assign a new confidence score to each
+variant, called VQSLOD. This is a log-ratio of the variant’s probabilities
+belonging to the positive and negative model.</p>
+</div>
+<div id="benchmarks-of-variantrecalibrator" class="section level2" number="8.2">
+<h2><span class="header-section-number">8.2</span> Benchmarks of <code>VariantRecalibrator</code></h2>
+<p>We did a benchmark on the performance of <code>VariantRecalibrator</code> with different
+numbers of CPUs and memory. As show in figure <a href="vqsr.html#fig:vqsr-cpu">8.1</a>, the running
+time didn’t reduce much after increasing threads.</p>
+
+<div class="figure" style="text-align: center"><span id="fig:vqsr-cpu"></span>
+<img src="images/08-VariantRecalibrator_benchmark_cpu_constrain.png" alt="Runtime of VariantRecalibrator as a function of the number of threads" width="70%" />
+<p class="caption">
+Figure 8.1: Runtime of <code>VariantRecalibrator</code> as a function of the number of threads
+</p>
+</div>
+<p>We normally recommend running jobs with 70%-80% efficiency. Based on the efficiency calculated from the runtime (figure <a href="vqsr.html#fig:vqsr-eff">8.2</a>),
+<code>variantRecalibrator</code> should not be run with more than 2 threads.</p>
+
+<div class="figure" style="text-align: center"><span id="fig:vqsr-eff"></span>
+<img src="images/08-VariantRecalibrator_efficiency_cpu_constrain.png" alt="Efficiency of VariantRecalibrator as a function of the number of threads" width="70%" />
+<p class="caption">
+Figure 8.2: Efficiency of <code>VariantRecalibrator</code> as a function of the number of threads
+</p>
+</div>
+<p>As for memory, increasing memory didn’t improve performance (figure
+<a href="vqsr.html#fig:vqsr-mem">8.3</a>), although a minimal of 4GB memory is required for the job
+to finish with 2 threads.</p>
+
+<div class="figure" style="text-align: center"><span id="fig:vqsr-mem"></span>
+<img src="images/08-VariantRecalibrator_benchmark_mem_constrain.png" alt="Runtime of VariantRecalibrator as a function of memory" width="70%" />
+<p class="caption">
+Figure 8.3: Runtime of <code>VariantRecalibrator</code> as a function of memory
+</p>
+</div>
+</div>
+<div id="optimized-script-for-variantrecalibrator" class="section level2" number="8.3">
+<h2><span class="header-section-number">8.3</span> Optimized script for <code>VariantRecalibrator</code></h2>
+<p>Step 1: We use <code>VariantRecalibrator</code> to build the model and calculate VQSLOD
+for SNP and INDEL separately:</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb22-1"><a href="vqsr.html#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> data/<span class="kw">;</span> <span class="dt">\</span></span>
+<span id="cb22-2"><a href="vqsr.html#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="ex">gatk</span> <span class="at">--java-options</span> <span class="st">&quot;-Djava.io.tmpdir=/lscratch/</span><span class="va">$SLURM_JOBID</span><span class="st"> -Xms4G -Xmx4G -XX:ParallelGCThreads=2&quot;</span> VariantRecalibrator <span class="dt">\</span></span>
+<span id="cb22-3"><a href="vqsr.html#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-tranche</span> 100.0 <span class="at">-tranche</span> 99.95 <span class="at">-tranche</span> 99.9 <span class="dt">\</span></span>
+<span id="cb22-4"><a href="vqsr.html#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-tranche</span> 99.5 <span class="at">-tranche</span> 99.0 <span class="at">-tranche</span> 97.0 <span class="at">-tranche</span> 96.0 <span class="dt">\</span></span>
+<span id="cb22-5"><a href="vqsr.html#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">-tranche</span> 95.0 <span class="at">-tranche</span> 94.0 <span class="dt">\</span></span>
+<span id="cb22-6"><a href="vqsr.html#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">-tranche</span> 93.5 <span class="at">-tranche</span> 93.0 <span class="at">-tranche</span> 92.0 <span class="at">-tranche</span> 91.0 <span class="at">-tranche</span> 90.0 <span class="dt">\</span></span>
+<span id="cb22-7"><a href="vqsr.html#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">-R</span> /fdb/igenomes/Homo_sapiens/UCSC/hg38/Sequence/WholeGenomeFasta/genome.fa <span class="dt">\</span></span>
+<span id="cb22-8"><a href="vqsr.html#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">-V</span> merged.vcf.gz <span class="dt">\</span></span>
+<span id="cb22-9"><a href="vqsr.html#cb22-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">--resource:hapmap,known</span><span class="op">=</span>false,training=true,truth=true,prior=15.0 <span class="dt">\</span></span>
+<span id="cb22-10"><a href="vqsr.html#cb22-10" aria-hidden="true" tabindex="-1"></a>  /fdb/GATK_resource_bundle/hg38/hapmap_3.3.hg38.vcf.gz  <span class="dt">\</span></span>
+<span id="cb22-11"><a href="vqsr.html#cb22-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">--resource:omni,known</span><span class="op">=</span>false,training=true,truth=false,prior=12.0 <span class="dt">\</span></span>
+<span id="cb22-12"><a href="vqsr.html#cb22-12" aria-hidden="true" tabindex="-1"></a>  /fdb/GATK_resource_bundle/hg38/1000G_omni2.5.hg38.vcf.gz <span class="dt">\</span></span>
+<span id="cb22-13"><a href="vqsr.html#cb22-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">--resource:1000G,known</span><span class="op">=</span>false,training=true,truth=false,prior=10.0 <span class="dt">\</span></span>
+<span id="cb22-14"><a href="vqsr.html#cb22-14" aria-hidden="true" tabindex="-1"></a>  /fdb/GATK_resource_bundle/hg38/1000G_phase1.snps.high_confidence.hg38.vcf.gz <span class="dt">\</span></span>
+<span id="cb22-15"><a href="vqsr.html#cb22-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">-an</span> QD <span class="at">-an</span> MQ <span class="at">-an</span> MQRankSum <span class="at">-an</span> ReadPosRankSum <span class="at">-an</span> FS <span class="at">-an</span> SOR  <span class="dt">\</span></span>
+<span id="cb22-16"><a href="vqsr.html#cb22-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">-mode</span> SNP <span class="at">-O</span> merged_SNP1.recal <span class="at">--tranches-file</span> output_SNP1.tranches <span class="dt">\</span></span>
+<span id="cb22-17"><a href="vqsr.html#cb22-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">--rscript-file</span> output_SNP1.plots.R</span>
+<span id="cb22-18"><a href="vqsr.html#cb22-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-19"><a href="vqsr.html#cb22-19" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> data/<span class="kw">;</span> <span class="dt">\</span></span>
+<span id="cb22-20"><a href="vqsr.html#cb22-20" aria-hidden="true" tabindex="-1"></a><span class="ex">gatk</span> <span class="at">--java-options</span> <span class="st">&quot;-Djava.io.tmpdir=/lscratch/</span><span class="va">$SLURM_JOBID</span><span class="st"> -Xms4G -Xmx4G -XX:ParallelGCThreads=2&quot;</span> VariantRecalibrator <span class="dt">\</span></span>
+<span id="cb22-21"><a href="vqsr.html#cb22-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">-tranche</span> 100.0 <span class="at">-tranche</span> 99.95 <span class="at">-tranche</span> 99.9 <span class="dt">\</span></span>
+<span id="cb22-22"><a href="vqsr.html#cb22-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">-tranche</span> 99.5 <span class="at">-tranche</span> 99.0 <span class="at">-tranche</span> 97.0 <span class="at">-tranche</span> 96.0 <span class="dt">\</span></span>
+<span id="cb22-23"><a href="vqsr.html#cb22-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">-tranche</span> 95.0 <span class="at">-tranche</span> 94.0 <span class="at">-tranche</span> 93.5 <span class="at">-tranche</span> 93.0 <span class="dt">\</span></span>
+<span id="cb22-24"><a href="vqsr.html#cb22-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">-tranche</span> 92.0 <span class="at">-tranche</span> 91.0 <span class="at">-tranche</span> 90.0 <span class="dt">\</span></span>
+<span id="cb22-25"><a href="vqsr.html#cb22-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">-R</span> /fdb/igenomes/Homo_sapiens/UCSC/hg38/Sequence/WholeGenomeFasta/genome.fa <span class="dt">\</span></span>
+<span id="cb22-26"><a href="vqsr.html#cb22-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">-V</span> merged.vcf.gz <span class="dt">\</span></span>
+<span id="cb22-27"><a href="vqsr.html#cb22-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">--resource:mills,known</span><span class="op">=</span>false,training=true,truth=true,prior=12.0 <span class="dt">\</span></span>
+<span id="cb22-28"><a href="vqsr.html#cb22-28" aria-hidden="true" tabindex="-1"></a>  /fdb/GATK_resource_bundle/hg38/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz <span class="dt">\</span></span>
+<span id="cb22-29"><a href="vqsr.html#cb22-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">--resource:dbsnp,known</span><span class="op">=</span>true,training=false,truth=false,prior=2.0 <span class="dt">\</span></span>
+<span id="cb22-30"><a href="vqsr.html#cb22-30" aria-hidden="true" tabindex="-1"></a>  /fdb/GATK_resource_bundle/hg38/dbsnp_146.hg38.vcf.gz <span class="dt">\</span></span>
+<span id="cb22-31"><a href="vqsr.html#cb22-31" aria-hidden="true" tabindex="-1"></a>  <span class="at">-an</span> QD <span class="at">-an</span> MQRankSum <span class="at">-an</span> ReadPosRankSum <span class="at">-an</span> FS <span class="at">-an</span> SOR <span class="at">-an</span> DP <span class="dt">\</span></span>
+<span id="cb22-32"><a href="vqsr.html#cb22-32" aria-hidden="true" tabindex="-1"></a>  <span class="at">-mode</span> INDEL <span class="at">-O</span> merged_indel1.recal <span class="at">--tranches-file</span> output_indel1.tranches <span class="dt">\</span></span>
+<span id="cb22-33"><a href="vqsr.html#cb22-33" aria-hidden="true" tabindex="-1"></a>  <span class="at">--rscript-file</span> output_indel1.plots.R</span></code></pre></div>
+<p>Jobs can be submitted with <a href="https://hpc.nih.gov/apps/swarm.html">swarm</a>:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb23-1"><a href="vqsr.html#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="ex">swarm</span> <span class="at">-t</span> 2 <span class="at">-g</span> 4 <span class="at">--gres</span><span class="op">=</span>lscratch:400 <span class="at">--time</span><span class="op">=</span>2:00:00 <span class="at">-m</span> GATK/4.1.8.1 <span class="at">-f</span> 08-GATK_VariantRecalibrator.sh</span></code></pre></div>
+</div>
+<div id="benchmarks-of-applyvqsr" class="section level2" number="8.4">
+<h2><span class="header-section-number">8.4</span> Benchmarks of <code>ApplyVQSR</code></h2>
+<p>We did benchmarks on the performance of <code>ApplyVQSR</code> with different numbers of
+CPUs and memory. As show in figure <a href="vqsr.html#fig:avqsr-cpu">8.4</a>, the running time is
+not reduced much when using multiple threads as with the other essentially single
+threaded tools.</p>
+
+<div class="figure" style="text-align: center"><span id="fig:avqsr-cpu"></span>
+<img src="images/08-ApplyVQSR_benchmark_cpu_constrain.png" alt="Runtime of ApplyVQSR as a function of the number of threads" width="70%" />
+<p class="caption">
+Figure 8.4: Runtime of <code>ApplyVQSR</code> as a function of the number of threads
+</p>
+</div>
+<p>We normally recommend running jobs with 70%-80% efficiency. Based on figure <a href="vqsr.html#fig:avqsr-eff">8.5</a> we recommend running <code>ApplyVQSR</code> with
+no more than two threads.</p>
+
+<div class="figure" style="text-align: center"><span id="fig:avqsr-eff"></span>
+<img src="images/08-ApplyVQSR_efficiency_cpu_constrain.png" alt="Efficiency of ApplyVQSR as a function of the number of threads" width="70%" />
+<p class="caption">
+Figure 8.5: Efficiency of <code>ApplyVQSR</code> as a function of the number of threads
+</p>
+</div>
+<p>Increasing memory beyond the minimum needed did not improve performance
+(figure <a href="vqsr.html#fig:avqsr-mem">8.6</a>). Using the <code>G1GC</code> garbage collector did not improve performance with default parameters, however
+it requires extra 6GB memory to avoid out of memory kill.</p>
+
+<div class="figure" style="text-align: center"><span id="fig:avqsr-mem"></span>
+<img src="images/08-ApplyVQSR_benchmark_mem_constrain.png" alt="Runtime of ApplyVQSR as a function of memory" width="70%" />
+<p class="caption">
+Figure 8.6: Runtime of <code>ApplyVQSR</code> as a function of memory
+</p>
+</div>
+</div>
+<div id="optimized-script-for-applyvqsr" class="section level2" number="8.5">
+<h2><span class="header-section-number">8.5</span> Optimized script for <code>ApplyVQSR</code></h2>
+<p>Step 2: We choose the VQSLOD cutoff to filter VCF file using <code>ApplyVQSR</code>:</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb24-1"><a href="vqsr.html#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co">#! /bin/bash</span></span>
+<span id="cb24-2"><a href="vqsr.html#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-euo</span></span>
+<span id="cb24-3"><a href="vqsr.html#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="co"># run ApplyVQSR on SNP then INDEL</span></span>
+<span id="cb24-4"><a href="vqsr.html#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="ex">module</span> load GATK/4.1.8.1</span>
+<span id="cb24-5"><a href="vqsr.html#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> data/<span class="kw">;</span></span>
+<span id="cb24-6"><a href="vqsr.html#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="ex">gatk</span> <span class="at">--java-options</span> <span class="st">&quot;-Djava.io.tmpdir=/lscratch/</span><span class="va">$SLURM_JOBID</span><span class="st"> </span><span class="dt">\</span></span>
+<span id="cb24-7"><a href="vqsr.html#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="st">  -Xms2G -Xmx2G -XX:ParallelGCThreads=2&quot;</span> ApplyVQSR <span class="dt">\</span></span>
+<span id="cb24-8"><a href="vqsr.html#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">-V</span> merged.vcf.gz <span class="dt">\</span></span>
+<span id="cb24-9"><a href="vqsr.html#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">--recal-file</span> merged_SNP1.recal <span class="dt">\</span></span>
+<span id="cb24-10"><a href="vqsr.html#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">-mode</span> SNP <span class="dt">\</span></span>
+<span id="cb24-11"><a href="vqsr.html#cb24-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">--tranches-file</span> output_SNP1.tranches <span class="dt">\</span></span>
+<span id="cb24-12"><a href="vqsr.html#cb24-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">--truth-sensitivity-filter-level</span> 99.9 <span class="dt">\</span></span>
+<span id="cb24-13"><a href="vqsr.html#cb24-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">--create-output-variant-index</span> true <span class="dt">\</span></span>
+<span id="cb24-14"><a href="vqsr.html#cb24-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">-O</span> SNP.recalibrated_99.9.vcf.gz</span>
+<span id="cb24-15"><a href="vqsr.html#cb24-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-16"><a href="vqsr.html#cb24-16" aria-hidden="true" tabindex="-1"></a><span class="ex">gatk</span> <span class="at">--java-options</span> <span class="st">&quot;-Djava.io.tmpdir=/lscratch/</span><span class="va">$SLURM_JOBID</span><span class="st"> </span><span class="dt">\</span></span>
+<span id="cb24-17"><a href="vqsr.html#cb24-17" aria-hidden="true" tabindex="-1"></a><span class="st">  -Xms2G -Xmx2G -XX:ParallelGCThreads=2&quot;</span> ApplyVQSR <span class="dt">\</span></span>
+<span id="cb24-18"><a href="vqsr.html#cb24-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">-V</span> SNP.recalibrated_99.9.vcf.gz <span class="dt">\</span></span>
+<span id="cb24-19"><a href="vqsr.html#cb24-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">-mode</span> INDEL <span class="dt">\</span></span>
+<span id="cb24-20"><a href="vqsr.html#cb24-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">--recal-file</span> merged_indel1.recal <span class="dt">\</span></span>
+<span id="cb24-21"><a href="vqsr.html#cb24-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">--tranches-file</span> output_indel1.tranches <span class="dt">\</span></span>
+<span id="cb24-22"><a href="vqsr.html#cb24-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">--truth-sensitivity-filter-level</span> 99.9 <span class="dt">\</span></span>
+<span id="cb24-23"><a href="vqsr.html#cb24-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">--create-output-variant-index</span> true <span class="dt">\</span></span>
+<span id="cb24-24"><a href="vqsr.html#cb24-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">-O</span> indel.SNP.recalibrated_99.9.vcf.gz</span></code></pre></div>
+<p>99.9% is the recommended default VQSLOD cutoff for SNPs in human genomic analysis.</p>
+<p>Job submission:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb25-1"><a href="vqsr.html#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> <span class="at">--cpus-per-task</span><span class="op">=</span>2 <span class="at">--mem</span><span class="op">=</span>2g <span class="at">--gres</span><span class="op">=</span>lscratch:100 <span class="at">--time</span><span class="op">=</span>2:00:00 08-GATK_ApplyVQSR.sh</span></code></pre></div>
+<p>Note:</p>
+<ul>
+<li>For INDEL there is no recommended VQSLOD cutoff, here we use 99.9 just as an example.</li>
+</ul>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="genotype-gvcfs.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="gt-posteriors.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["GATK.pdf", "GATK.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

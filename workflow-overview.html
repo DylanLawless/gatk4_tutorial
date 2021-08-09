@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 2 GATK practice workflow | A practical introduction to GATK 4 on Biowulf (NIH HPC)</title>
+  <meta name="description" content="Chapter 2 GATK practice workflow | A practical introduction to GATK 4 on Biowulf (NIH HPC)" />
+  <meta name="generator" content="bookdown 0.22 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 2 GATK practice workflow | A practical introduction to GATK 4 on Biowulf (NIH HPC)" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 2 GATK practice workflow | A practical introduction to GATK 4 on Biowulf (NIH HPC)" />
+  
+  
+  
+
+<meta name="author" content="Qi Yu and Wolfgang Resch" />
+
+
+<meta name="date" content="2021-06-15" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="preproc.html"/>
+<link rel="next" href="markdup.html"/>
+<script src="libs/header-attrs-2.8/header-attrs.js"></script>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">GATK on biowulf</a></li>
+<li class="toc-logo"><a href="./"><img src="images/Biowulf_Logo_RGB_Cyan_Blue.png" height=42></a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Prerequisites</a>
+<ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#software"><i class="fa fa-check"></i>Software</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#sequencing-data"><i class="fa fa-check"></i>Sequencing data</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="preproc.html"><a href="preproc.html"><i class="fa fa-check"></i><b>1</b> Data preprocessing</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="preproc.html"><a href="preproc.html#brief-introduction"><i class="fa fa-check"></i><b>1.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="1.2" data-path="preproc.html"><a href="preproc.html#preproc-tools"><i class="fa fa-check"></i><b>1.2</b> Tools</a></li>
+<li class="chapter" data-level="1.3" data-path="preproc.html"><a href="preproc.html#preproc-single-tools"><i class="fa fa-check"></i><b>1.3</b> Individual tool benchmarks</a>
+<ul>
+<li class="chapter" data-level="1.3.1" data-path="preproc.html"><a href="preproc.html#preproc-trim"><i class="fa fa-check"></i><b>1.3.1</b> Adapter trimming</a></li>
+<li class="chapter" data-level="1.3.2" data-path="preproc.html"><a href="preproc.html#preproc-align"><i class="fa fa-check"></i><b>1.3.2</b> Alignment</a></li>
+<li class="chapter" data-level="1.3.3" data-path="preproc.html"><a href="preproc.html#preproc-sort"><i class="fa fa-check"></i><b>1.3.3</b> Alternative A: Sorting by coordinate</a></li>
+<li class="chapter" data-level="1.3.4" data-path="preproc.html"><a href="preproc.html#preproc-view"><i class="fa fa-check"></i><b>1.3.4</b> Alternative B: Queryname-grouped (unsorted) BAM</a></li>
+</ul></li>
+<li class="chapter" data-level="1.4" data-path="preproc.html"><a href="preproc.html#optimized-script"><i class="fa fa-check"></i><b>1.4</b> Optimized script</a>
+<ul>
+<li class="chapter" data-level="1.4.1" data-path="preproc.html"><a href="preproc.html#alternative-a-producing-sorted-bam-output"><i class="fa fa-check"></i><b>1.4.1</b> Alternative A: producing sorted BAM output</a></li>
+<li class="chapter" data-level="1.4.2" data-path="preproc.html"><a href="preproc.html#preproc-nosort-pipeline"><i class="fa fa-check"></i><b>1.4.2</b> Alternative B: BAM output without coordinate sorting</a></li>
+</ul></li>
+<li class="chapter" data-level="1.5" data-path="preproc.html"><a href="preproc.html#read-groups"><i class="fa fa-check"></i><b>1.5</b> Read groups</a></li>
+<li class="chapter" data-level="1.6" data-path="preproc.html"><a href="preproc.html#processing-the-example-trio"><i class="fa fa-check"></i><b>1.6</b> Processing the example trio</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="workflow-overview.html"><a href="workflow-overview.html"><i class="fa fa-check"></i><b>2</b> GATK practice workflow</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="workflow-overview.html"><a href="workflow-overview.html#cleaning-up-raw-alignments"><i class="fa fa-check"></i><b>2.1</b> Cleaning up raw alignments</a></li>
+<li class="chapter" data-level="2.2" data-path="workflow-overview.html"><a href="workflow-overview.html#joint-calling"><i class="fa fa-check"></i><b>2.2</b> Joint Calling</a></li>
+<li class="chapter" data-level="2.3" data-path="workflow-overview.html"><a href="workflow-overview.html#variant-filtering"><i class="fa fa-check"></i><b>2.3</b> Variant filtering</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="markdup.html"><a href="markdup.html"><i class="fa fa-check"></i><b>3</b> MarkDuplicates</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="markdup.html"><a href="markdup.html#brief-introduction-1"><i class="fa fa-check"></i><b>3.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="3.2" data-path="markdup.html"><a href="markdup.html#benchmarks-of-markduplicatesspark"><i class="fa fa-check"></i><b>3.2</b> Benchmarks of <code>MarkDuplicatesSpark</code></a>
+<ul>
+<li class="chapter" data-level="3.2.1" data-path="markdup.html"><a href="markdup.html#queryname-grouped-input-data-as-generated-by-the-aligner"><i class="fa fa-check"></i><b>3.2.1</b> Queryname-grouped input data (as generated by the aligner)</a></li>
+<li class="chapter" data-level="3.2.2" data-path="markdup.html"><a href="markdup.html#coordinate-sorted-input-data"><i class="fa fa-check"></i><b>3.2.2</b> Coordinate-sorted input data</a></li>
+<li class="chapter" data-level="3.2.3" data-path="markdup.html"><a href="markdup.html#performance-comparing-between-queryname-grouped-and-coordinate-sorted-inputs"><i class="fa fa-check"></i><b>3.2.3</b> Performance comparing between queryname-grouped and coordinate-sorted inputs</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="markdup.html"><a href="markdup.html#optimized-script-1"><i class="fa fa-check"></i><b>3.3</b> Optimized script</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="bqsr.html"><a href="bqsr.html"><i class="fa fa-check"></i><b>4</b> BQSR</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="bqsr.html"><a href="bqsr.html#brief-introduction-2"><i class="fa fa-check"></i><b>4.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="4.2" data-path="bqsr.html"><a href="bqsr.html#benchmarks-of-baserecalibrator"><i class="fa fa-check"></i><b>4.2</b> Benchmarks of <code>BaseRecalibrator</code></a></li>
+<li class="chapter" data-level="4.3" data-path="bqsr.html"><a href="bqsr.html#optimized-script-for-baserecalibrator"><i class="fa fa-check"></i><b>4.3</b> Optimized script for <code>BaseRecalibrator</code></a></li>
+<li class="chapter" data-level="4.4" data-path="bqsr.html"><a href="bqsr.html#benchmarks-of-applybqsr"><i class="fa fa-check"></i><b>4.4</b> Benchmarks of <code>ApplyBQSR</code></a></li>
+<li class="chapter" data-level="4.5" data-path="bqsr.html"><a href="bqsr.html#optimized-script-for-applybqsr"><i class="fa fa-check"></i><b>4.5</b> Optimized script for <code>ApplyBQSR</code></a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="haplotype-caller.html"><a href="haplotype-caller.html"><i class="fa fa-check"></i><b>5</b> HaplotypeCaller</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="haplotype-caller.html"><a href="haplotype-caller.html#brief-introduction-3"><i class="fa fa-check"></i><b>5.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="5.2" data-path="haplotype-caller.html"><a href="haplotype-caller.html#benchmarks"><i class="fa fa-check"></i><b>5.2</b> Benchmarks</a></li>
+<li class="chapter" data-level="5.3" data-path="haplotype-caller.html"><a href="haplotype-caller.html#optimized-script-2"><i class="fa fa-check"></i><b>5.3</b> Optimized script</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="genomics-db-import.html"><a href="genomics-db-import.html"><i class="fa fa-check"></i><b>6</b> GenomicsDBImport (replaces CombineGVCFs)</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="genomics-db-import.html"><a href="genomics-db-import.html#brief-introduction-4"><i class="fa fa-check"></i><b>6.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="6.2" data-path="genomics-db-import.html"><a href="genomics-db-import.html#benchmarks-1"><i class="fa fa-check"></i><b>6.2</b> Benchmarks</a></li>
+<li class="chapter" data-level="6.3" data-path="genomics-db-import.html"><a href="genomics-db-import.html#optimized-script-3"><i class="fa fa-check"></i><b>6.3</b> Optimized script</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="genotype-gvcfs.html"><a href="genotype-gvcfs.html"><i class="fa fa-check"></i><b>7</b> GenotypeGVCFs</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="genotype-gvcfs.html"><a href="genotype-gvcfs.html#brief-introduction-5"><i class="fa fa-check"></i><b>7.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="7.2" data-path="genotype-gvcfs.html"><a href="genotype-gvcfs.html#benchmarks-2"><i class="fa fa-check"></i><b>7.2</b> Benchmarks</a></li>
+<li class="chapter" data-level="7.3" data-path="genotype-gvcfs.html"><a href="genotype-gvcfs.html#optimized-script-4"><i class="fa fa-check"></i><b>7.3</b> Optimized script</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="vqsr.html"><a href="vqsr.html"><i class="fa fa-check"></i><b>8</b> VQSR</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="vqsr.html"><a href="vqsr.html#brief-introduction-6"><i class="fa fa-check"></i><b>8.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="8.2" data-path="vqsr.html"><a href="vqsr.html#benchmarks-of-variantrecalibrator"><i class="fa fa-check"></i><b>8.2</b> Benchmarks of <code>VariantRecalibrator</code></a></li>
+<li class="chapter" data-level="8.3" data-path="vqsr.html"><a href="vqsr.html#optimized-script-for-variantrecalibrator"><i class="fa fa-check"></i><b>8.3</b> Optimized script for <code>VariantRecalibrator</code></a></li>
+<li class="chapter" data-level="8.4" data-path="vqsr.html"><a href="vqsr.html#benchmarks-of-applyvqsr"><i class="fa fa-check"></i><b>8.4</b> Benchmarks of <code>ApplyVQSR</code></a></li>
+<li class="chapter" data-level="8.5" data-path="vqsr.html"><a href="vqsr.html#optimized-script-for-applyvqsr"><i class="fa fa-check"></i><b>8.5</b> Optimized script for <code>ApplyVQSR</code></a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="gt-posteriors.html"><a href="gt-posteriors.html"><i class="fa fa-check"></i><b>9</b> Calculate genotype posteriors</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="gt-posteriors.html"><a href="gt-posteriors.html#brief-introduction-7"><i class="fa fa-check"></i><b>9.1</b> Brief introduction</a></li>
+<li class="chapter" data-level="9.2" data-path="gt-posteriors.html"><a href="gt-posteriors.html#benchmarks-3"><i class="fa fa-check"></i><b>9.2</b> Benchmarks</a></li>
+<li class="chapter" data-level="9.3" data-path="gt-posteriors.html"><a href="gt-posteriors.html#optimized-script-5"><i class="fa fa-check"></i><b>9.3</b> Optimized script</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">A practical introduction to GATK 4 on Biowulf (NIH HPC)</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="workflow-overview" class="section level1" number="2">
+<h1><span class="header-section-number">Chapter 2</span> GATK practice workflow</h1>
+<p>Here we build a workflow for germline short variant calling. It is based on
+the GATK Best Practices <a href="https://drive.google.com/drive/folders/1y7q0gJ-ohNDhKG85UTRTwW1Jkq4HJ5M3">workshop</a> taught by the Broad Institute which was also the source of
+the figures used in this Chapter.</p>
+<p>There are three main steps: Cleaning up raw alignments, joint calling, and variant filtering.</p>
+<div id="cleaning-up-raw-alignments" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Cleaning up raw alignments</h2>
+<p>This includes two steps:</p>
+<dl>
+<dt>Step 1: Marking duplicate reads (<code>MarkDuplicates</code>, <code>MarkDuplicatesSpark</code>) (Chapter <a href="markdup.html#markdup">3</a>)</dt>
+<dd>Marking duplicates is a general preprocessing step for variant calling. Most variant<br />
+detection tools require duplicates to be tagged in mapped reads to reduce bias.
+</dd>
+<dt>Step 2: Base Quality Scores Recalibration (<code>BaseRecalibrator</code>, <code>ApplyBQSR</code>) (Chapter <a href="bqsr.html#bqsr">4</a>)</dt>
+<dd>Sequencers make systematic errors in assigning base quality scores. To correct
+for these errors, a model is built using covariates encoded in the read groups
+from all base calls and then applying the adjustments to generate recalibrated base
+qualities(<a href="workflow-overview.html#fig:bqsr">2.1</a>).
+</dd>
+</dl>
+<div class="figure" style="text-align: center"><span id="fig:bqsr"></span>
+<img src="images/02-bqsr-graph.png" alt="The effect of BQSR" width="720" />
+<p class="caption">
+Figure 2.1: The effect of BQSR
+</p>
+</div>
+</div>
+<div id="joint-calling" class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> Joint Calling</h2>
+<p>A single genome is rarely useful by itself. Most scientific questions require
+the analysis of multiple genomes - anywhere from a few genomes from a family
+to study disease inheritance to large numbers in population genetic
+studies. The joint calling approach takes advantage of data from the whole set
+of genomes to improve sensitivity of genotype inference in each genome, boost
+statistical power and reduce technical artifacts. It accounts, for example, for
+the difference between no variant call in a sample due to missing data
+vs good data showing no variation.</p>
+<p>It also makes it easier to add samples progressively by combining initial calls
+in GVCF or GenomicsDB format.</p>
+<p>This example uses a parent-daughter trio. Single sample analysis is not discussed.</p>
+<div class="figure" style="text-align: center"><span id="fig:jointcall"></span>
+<img src="images/02-joint-overview.png" alt="The power of joint calling" width="710" />
+<p class="caption">
+Figure 2.2: The power of joint calling
+</p>
+</div>
+<p>Example (<a href="workflow-overview.html#fig:jointcall">2.2</a>): (left) The variant allele is present in only
+two of the N samples, in both cases with low coverage so that the variant may
+not be callable when processed separately. (right) Neither sample will have
+records in a variants-only output file when analyzed separately, they will be
+identified as non-informative. The first sample is homozygous reference, while
+the second sample has no data. In both cases, joint calling allows evidence to
+be accumulated over all samples.</p>
+<p>There are three steps in joint callings:</p>
+<dl>
+<dt>Step 1: <code>HaplotypeCaller</code> (Chapter <a href="haplotype-caller.html#haplotype-caller">5</a>)</dt>
+<dd>Used to call variants per sample and save calls in GVCF format.
+</dd>
+<dt>Step 2: <code>GenomicsDBImport</code> (Chapter <a href="genomics-db-import.html#genomics-db-import">6</a>)</dt>
+<dd>Consolidate cohort GVCF data into GenomicsDB format files.
+</dd>
+<dt>Step 3: <code>GenotypeGVCFs</code> (Chapter <a href="genotype-gvcfs.html#genotype-gvcfs">7</a>)</dt>
+<dd>Identify candidate variants from merged GVCFs or GenomicsDB database.
+</dd>
+</dl>
+</div>
+<div id="variant-filtering" class="section level2" number="2.3">
+<h2><span class="header-section-number">2.3</span> Variant filtering</h2>
+<p>Raw variant calls include many artifacts and the goal of variant filtering
+is to remove as many artifacts as possible at the minimal loss of sensitivity
+for real variants.</p>
+<dl>
+<dt>Step 1: Variant Quality Score Recalibration (<code>VariantRecalibrator</code>, <code>ApplyVQSR</code>) (Chapter <a href="vqsr.html#vqsr">8</a>)</dt>
+<dd>The core algorithm in VQSR is a Gaussian mixture model that aims to classify
+variants based on how their annotation values cluster given a training set of
+high-confidence variants(<a href="workflow-overview.html#fig:vqsr">2.3</a>).
+</dd>
+</dl>
+<div class="figure" style="text-align: center"><span id="fig:vqsr"></span>
+<img src="images/02-vqsr-overview.png" alt="Determination of VQSL shreshold" width="790" />
+<p class="caption">
+Figure 2.3: Determination of VQSL shreshold
+</p>
+</div>
+<dl>
+<dt>Step 2: <code>CalculateGenotypePosteriors</code> (Chapter <a href="gt-posteriors.html#gt-posteriors">9</a>)</dt>
+<dd>Uses pedigree information and allele frequencies to refine genotype calls.
+</dd>
+</dl>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="preproc.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="markdup.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["GATK.pdf", "GATK.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>
